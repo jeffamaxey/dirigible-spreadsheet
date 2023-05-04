@@ -11,20 +11,18 @@ _worksheetNameRegex = re.compile(r"^[A-Za-z]\w*$")
 def quote_fl_worksheet_name(name):
     if re.match(_worksheetNameRegex, name) is not None:
         return name
-    return "'%s'" % name.replace("'", "''")
+    return f"""'{name.replace("'", "''")}'"""
 
 
 def unquote_fl_worksheet_name(name):
     name = name.replace("''", "'")
-    if name.startswith("'"):
-        return name[1:-1]
-    return name
+    return name[1:-1] if name.startswith("'") else name
 
 
 class FLReferenceParseNode(ParseNode):
 
     def __init__(self, nodeType, children):
-        assert len(children) in (1, 3)
+        assert len(children) in {1, 3}
         ParseNode.__init__(self, nodeType, children)
 
 

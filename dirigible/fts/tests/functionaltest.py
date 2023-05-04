@@ -45,7 +45,7 @@ IMAP_PASSWORD = ""
 
 
 def _debug(text):
-    msg = '{}   {}'.format(round(time.time(), 2), text)
+    msg = f'{round(time.time(), 2)}   {text}'
     print(msg)
     # print(msg, file=sys.stderr)
 
@@ -62,15 +62,17 @@ class Url(object):
 
     @classmethod
     def user_page(cls, username):
-        return urljoin(Url.ROOT, '/user/%s/' % (username,))
+        return urljoin(Url.ROOT, f'/user/{username}/')
 
     @classmethod
     def sheet_page(cls, username, sheet_id):
-        return urljoin(cls.user_page(username), 'sheet/%s/' % (sheet_id,))
+        return urljoin(cls.user_page(username), f'sheet/{sheet_id}/')
 
     @classmethod
     def api_url(cls, username, sheet_id):
-        return urljoin(cls.sheet_page(username, sheet_id), 'v%s/json/' % (CURRENT_API_VERSION,))
+        return urljoin(
+            cls.sheet_page(username, sheet_id), f'v{CURRENT_API_VERSION}/json/'
+        )
 
 
 
@@ -86,17 +88,18 @@ def snapshot_on_error(test):
             try:
                 filename = test_object.get_dump_filename()
                 _debug('screenshot to {}.png'.format(filename))
-                test_object.browser.get_screenshot_as_file(filename + '.png')
+                test_object.browser.get_screenshot_as_file(f'{filename}.png')
                 _debug('page source dump  to {}.html'.format(filename))
-                with open(filename + '.html', 'w') as f:
+                with open(f'{filename}.html', 'w') as f:
                     f.write(test_object.browser.page_source.encode('utf8'))
                 _debug('page text dump  to {}.txt'.format(filename))
-                with open(filename + '.txt', 'w') as f:
+                with open(f'{filename}.txt', 'w') as f:
                     body_text = test_object.browser.find_element_by_tag_name('body').text
                     f.write(body_text.encode('utf8'))
             except:
                 _debug('Exception writing screenshots')
             raise
+
     return inner
 
 
@@ -192,7 +195,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self):
         self.create_users()
-        _debug("%s ##### Running test %s" % (datetime.datetime.now(), self.id()))
+        _debug(f"{datetime.datetime.now()} ##### Running test {self.id()}")
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(DEFAULT_WAIT_FOR_TIMEOUT)
         self.browser.set_window_size(1024, 768)
@@ -201,7 +204,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def tearDown(self):
         _debug('quitting browser')
         self.browser.quit()
-        _debug("%s ##### Finished test %s" % (datetime.datetime.now(), self.id()))
+        _debug(f"{datetime.datetime.now()} ##### Finished test {self.id()}")
 
 
     def login(
@@ -294,7 +297,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_css_property(self, jquery_locator, property_name):
-        property_value = self.selenium.get_eval('window.$("%s").css("%s")' % (jquery_locator, property_name))
+        property_value = self.selenium.get_eval(
+            f'window.$("{jquery_locator}").css("{property_name}")'
+        )
         if property_value == 'rgba(0, 0, 0, 0)': # transparent in chrome
             return 'transparent'
         if property_value.startswith('rgb'):
@@ -303,7 +308,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             property_value = property_value.upper()
             if len(property_value) == 4:
                 _, r, g, b = property_value
-                property_value = '#%s%s%s%s%s%s' % (r, r, g, g, b, b)
+                property_value = f'#{r}{r}{g}{g}{b}{b}'
         return property_value
 
 
@@ -332,7 +337,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def is_element_enabled(self, element_id):
         #self.selenium.get_attribute is unreliable (Harry, Jonathan)
-        disabled = self.selenium.get_eval('window.$("#%s").attr("disabled")' % (element_id,))
+        disabled = self.selenium.get_eval(
+            f'window.$("#{element_id}").attr("disabled")'
+        )
         return disabled not in ("true", "disabled")
 
 
@@ -340,9 +347,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         self, locator, present=True, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT
     ):
         if present:
-            failure_message = "Element %s to be present" % (locator, ),
+            failure_message = (f"Element {locator} to be present", )
         else:
-            failure_message = "Element %s to not exist" % (locator, ),
+            failure_message = (f"Element {locator} to not exist", )
         self.wait_for(
             lambda: self.is_element_present(locator) == present,
             lambda: failure_message,
@@ -364,21 +371,20 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def wait_for_element_visibility(self, locator, visibility, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         self.wait_for(
-            lambda : self.selenium.is_visible(locator) == visibility,
-            lambda : "Element %s to become%svisible" % (locator, visibility and ' ' or ' in'),
-            timeout_seconds=timeout_seconds
+            lambda: self.selenium.is_visible(locator) == visibility,
+            lambda: f"Element {locator} to become{visibility and ' ' or ' in'}visible",
+            timeout_seconds=timeout_seconds,
         )
 
 
     def get_url_with_session_cookie(self, url, data=None):
         opener = urllib2.build_opener()
         session_cookie = self.selenium.get_cookie_by_name('sessionid')
-        opener.addheaders.append(('Cookie', 'sessionid=%s' % (session_cookie, )))
+        opener.addheaders.append(('Cookie', f'sessionid={session_cookie}'))
         if data is None:
             return opener.open(url)
-        else:
-            encoded_data = urllib.urlencode(data)
-            return opener.open(url, encoded_data)
+        encoded_data = urllib.urlencode(data)
+        return opener.open(url, encoded_data)
 
 
     def create_new_sheet(self, username=None, manually=False):
@@ -402,11 +408,13 @@ class FunctionalTest(StaticLiveServerTestCase):
         for user_index in range(self.user_count):
             capture_test_details = re.compile(r'test_(\d+)_[^\.]*\.[^\.]*\.test_(.*)$')
             match = re.search(capture_test_details, self.id())
-            test_task_id = match.group(1)
-            test_method_name = match.group(2)
+            test_task_id = match[1]
+            test_method_name = match[2]
             test_method_hash = hashlib.md5(test_method_name).hexdigest()[:7]
 
-            usernames.append(("tstusr_%s_%s" % (test_task_id, test_method_hash))[:29] + str(user_index))
+            usernames.append(
+                f"tstusr_{test_task_id}_{test_method_hash}"[:29] + str(user_index)
+            )
         return usernames
 
 
@@ -429,9 +437,9 @@ class FunctionalTest(StaticLiveServerTestCase):
             except NoSuchElementException:
                 pass
 
-        self.fail("Could not find a logo that is also a link on page {}".format(
-            self.browser.current_url
-        ))
+        self.fail(
+            f"Could not find a logo that is also a link on page {self.browser.current_url}"
+        )
 
 
     def check_page_load(self, link_destination=None):
@@ -439,7 +447,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def go_to_url(self, url):
-        _debug('going to url ' + url)
+        _debug(f'going to url {url}')
         self.browser.get(url)
         self.check_page_load(url)
 
@@ -489,38 +497,36 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_cell_css(self, column, row, must_be_active=False):
-        active_classes = ''
-        if must_be_active:
-            active_classes = '.active'
+        active_classes = '.active' if must_be_active else ''
         return 'div.slick-row[row="%d"] div.slick-cell.c%d%s' % (
             row - 1, column, active_classes
         )
 
 
     def get_cell_locator(self, column, row, must_be_active=False):
-        return 'css=%s' % (self.get_cell_css(column, row, must_be_active),)
+        return f'css={self.get_cell_css(column, row, must_be_active)}'
 
 
     def get_cell_formatted_value_locator(self, column, row, raise_if_cell_missing=True):
         cell_css = self.get_cell_css(column, row)
-        if not self.is_element_present('css=%s' % (cell_css,)):
+        if not self.is_element_present(f'css={cell_css}'):
             if raise_if_cell_missing:
-                raise Exception("Cell not present at %s, %s" % (column, row))
+                raise Exception(f"Cell not present at {column}, {row}")
             else:
                 return None
-        return 'css=%s span.grid_formatted_value' % (cell_css,)
+        return f'css={cell_css} span.grid_formatted_value'
 
 
 
     cell_editor_css = 'input.editor-text'
 
     def get_active_cell_editor_locator(self):
-        return 'css={}'.format(self.cell_editor_css)
+        return f'css={self.cell_editor_css}'
 
 
     def get_cell_editor_locator(self, column, row):
         cell_css = self.get_cell_css(column, row)
-        return 'css=%s %s' % (cell_css, self.cell_editor_css)
+        return f'css={cell_css} {self.cell_editor_css}'
 
 
     def get_cell_editor(self):
@@ -531,40 +537,31 @@ class FunctionalTest(StaticLiveServerTestCase):
         tries = 0
         while tries < 4:
             try:
-                return 'true' == self.selenium.get_eval(dedent(
-                    '''
-                        (function () {
-                            var viewport = window.grid.getViewport();
-                            if (viewport.top > %(row)s || %(row)s > viewport.bottom) {
-                                return false;
-                            }
-
-                            var $canvasDiv = window.$('div.grid-canvas');
-                            var $viewportDiv = window.$('div.slick-viewport');
-                            var viewableLeft = -$canvasDiv.position().left;
-                            var viewableRight = viewableLeft + $viewportDiv.width();
-                            var $currentCell = window.$('%(current_cell_css)s');
-                            var currentCellLeft = $currentCell.position().left;
-                            var currentCellRight = currentCellLeft + $currentCell.outerWidth();
-                            if (viewableLeft > currentCellLeft || currentCellRight > viewableRight) {
-                                return false;
-                            }
-
-                            return true;
-                        })()
-                    ''' % dict(row=row, col=column, current_cell_css=self.get_cell_css(column, row) )
-                ) )
+                return (
+                    self.selenium.get_eval(
+                        dedent(
+                            '''     #                        (function () {     #                            var viewport = window.grid.getViewport();     #                            if (viewport.top > %(row)s || %(row)s > viewport.bottom) {     #                                return false;     #                            }     #     #                            var $canvasDiv = window.$('div.grid-canvas');     #                            var $viewportDiv = window.$('div.slick-viewport');     #                            var viewableLeft = -$canvasDiv.position().left;     #                            var viewableRight = viewableLeft + $viewportDiv.width();     #                            var $currentCell = window.$('%(current_cell_css)s');     #                            var currentCellLeft = $currentCell.position().left;     #                            var currentCellRight = currentCellLeft + $currentCell.outerWidth();     #                            if (viewableLeft > currentCellLeft || currentCellRight > viewableRight) {     #                                return false;     #                            }     #     #                            return true;     #                        })()     #                    '''
+                            % dict(
+                                row=row,
+                                col=column,
+                                current_cell_css=self.get_cell_css(column, row),
+                            )
+                        )
+                    )
+                    == 'true'
+                )
             except:
                 time.sleep(1)
                 tries += 1
 
-        self.fail("Could not check for cell visibility at %s, %s after %s tries" % (column, row, tries))
+        self.fail(
+            f"Could not check for cell visibility at {column}, {row} after {tries} tries"
+        )
 
 
     def assert_cell_visible(self, column, row):
         self.assertTrue(
-            self.is_cell_visible(column, row),
-            'cell %s, %s not visible' % (column, row)
+            self.is_cell_visible(column, row), f'cell {column}, {row} not visible'
         )
 
 
@@ -573,9 +570,9 @@ class FunctionalTest(StaticLiveServerTestCase):
     ):
         self.wait_for(
             lambda: self.is_cell_visible(column, row),
-            lambda: "Cell at %s, %s to become visible" % (column, row),
+            lambda: f"Cell at {column}, {row} to become visible",
             allow_exceptions=True,
-            timeout_seconds=timeout_seconds
+            timeout_seconds=timeout_seconds,
         )
 
 
@@ -584,7 +581,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def get_formula_bar_locator(self):
-        return "id=%s" % (self.get_formula_bar_id(),)
+        return f"id={self.get_formula_bar_id()}"
 
 
     def is_formula_bar_enabled(self):
@@ -599,8 +596,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 
     def go_to_cell(self, column, row):
-        self.selenium.get_eval(
-            'window.grid.gotoCell(%s, %s, false)' % (row - 1, column))
+        self.selenium.get_eval(f'window.grid.gotoCell({row - 1}, {column}, false)')
         self.wait_for_element_to_appear(self.get_cell_locator(column, row))
 
 
@@ -639,13 +635,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         if thoroughly:
             for row in range(topleft[1],bottomright[1] + 1):
                 for col in range(topleft[0],bottomright[0] + 1):
-                    locator = self.get_cell_locator(col, row) + '.selected'
+                    locator = f'{self.get_cell_locator(col, row)}.selected'
                     self.wait_for_element_to_appear(locator)
         else:
-            topleft_locator = self.get_cell_locator(*topleft) + '.selected'
-            bottomright_locator = (
-                self.get_cell_locator(*bottomright) + '.selected'
-            )
+            topleft_locator = f'{self.get_cell_locator(*topleft)}.selected'
+            bottomright_locator = f'{self.get_cell_locator(*bottomright)}.selected'
             self.wait_for_element_to_appear(topleft_locator)
             self.wait_for_element_to_appear(bottomright_locator)
 
@@ -686,8 +680,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_text(self, column, row):
         self.scroll_cell_row_into_view(column, row)
-        text = self.get_text(self.get_cell_locator(column, row))
-        return text
+        return self.get_text(self.get_cell_locator(column, row))
 
 
     def get_cell_editor_content(self):
@@ -696,23 +689,23 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_cell_shown_formula_locator(self, column, row, raise_if_cell_missing=True):
         cell_css = self.get_cell_css(column, row)
-        if not self.is_element_present('css=%s' % (cell_css,)):
+        if not self.is_element_present(f'css={cell_css}'):
             if raise_if_cell_missing:
-                raise Exception("Cell not present at %s, %s" % (column, row))
+                raise Exception(f"Cell not present at {column}, {row}")
             else:
                 return None
-        return 'css=%s span.grid_formula' % (cell_css,)
+        return f'css={cell_css} span.grid_formula'
 
 
     def get_cell_shown_formula(self, column, row, raise_if_cell_missing=True):
         formula_locator = self.get_cell_shown_formula_locator(
             column, row, raise_if_cell_missing
         )
-        if not self.is_element_present(formula_locator):
-            return None
-
-        formula = self.get_text(formula_locator)
-        return formula
+        return (
+            self.get_text(formula_locator)
+            if self.is_element_present(formula_locator)
+            else None
+        )
 
 
     def assert_cell_shown_formula(self, column, row, formula):
@@ -830,10 +823,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         locator = self.get_cell_locator(column, row, must_be_active=True)
         self.wait_for(
             lambda: self.is_element_present(locator),
-            lambda: "Cell at (%s, %s) was not active. Selection is: %s" % (
-                column, row, self.get_current_cell()
-            ),
-            timeout_seconds=timeout_seconds
+            lambda: f"Cell at ({column}, {row}) was not active. Selection is: {self.get_current_cell()}",
+            timeout_seconds=timeout_seconds,
         )
 
 
@@ -844,17 +835,15 @@ class FunctionalTest(StaticLiveServerTestCase):
         full_editor_locator = self.get_cell_editor_locator(column, row)
         self.wait_for(
             lambda: self.is_element_focused(full_editor_locator),
-            lambda: "Editor at (%s, %s) to get focus" % (column, row),
-            timeout_seconds=timeout_seconds
+            lambda: f"Editor at ({column}, {row}) to get focus",
+            timeout_seconds=timeout_seconds,
         )
 
 
     def wait_for_cell_editor_content(self, content):
         self.wait_for(
             lambda: self.get_cell_editor_content() == content,
-            lambda: "Cell editor to become %s (was '%s')" % (
-                content, self.get_cell_editor_content()
-            ),
+            lambda: f"Cell editor to become {content} (was '{self.get_cell_editor_content()}')",
         )
 
 
@@ -898,9 +887,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     @humanise_with_delay
     def enter_usercode(self, code, commit_change=True):
         self.browser.execute_script(
-            "window.editor.session.setValue(%s);" % (
-                repr(unicode(code))[1:],
-            )
+            f"window.editor.session.setValue({repr(unicode(code))[1:]});"
         )
         if commit_change:
             self.human_key_press(Keys.F9)
@@ -943,8 +930,8 @@ class FunctionalTest(StaticLiveServerTestCase):
     def wait_for_console_content(self, content, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         self.wait_for(
             lambda: content in self.get_console_content(),
-            lambda : 'error console to contain "%s" (was "%s")' % (content, self.get_console_content()),
-           timeout_seconds=timeout_seconds
+            lambda: f'error console to contain "{content}" (was "{self.get_console_content()}")',
+            timeout_seconds=timeout_seconds,
         )
 
 
@@ -958,9 +945,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def wait_for_formula_bar_contents(self, contents, timeout_seconds=DEFAULT_WAIT_FOR_TIMEOUT):
         self.wait_for(
-            lambda : self.get_formula_bar_contents() == contents,
-            lambda : 'formula bar to contain "%s" (was "%s")' % (contents, self.get_formula_bar_contents() ),
-            timeout_seconds=timeout_seconds
+            lambda: self.get_formula_bar_contents() == contents,
+            lambda: f'formula bar to contain "{contents}" (was "{self.get_formula_bar_contents()}")',
+            timeout_seconds=timeout_seconds,
         )
 
     def click_formula_bar(self):
@@ -1025,15 +1012,14 @@ class FunctionalTest(StaticLiveServerTestCase):
     def pop_email_for_client(self, email_address, fail_if_none=True, content_filter=None):
         retries = 6
         while retries:
-            message = self._pop_email_for_client_once(email_address, content_filter=content_filter)
-            if message:
+            if message := self._pop_email_for_client_once(
+                email_address, content_filter=content_filter
+            ):
                 return message
-            else:
-                retries -= 1
-                if retries == 0:
-                    if fail_if_none:
-                        self.fail('Email not received')
-                time.sleep(5)
+            retries -= 1
+            if retries == 0 and fail_if_none:
+                self.fail('Email not received')
+            time.sleep(5)
 
 
     def _pop_email_for_client_once(self, email_address, content_filter=None):
@@ -1060,11 +1046,12 @@ class FunctionalTest(StaticLiveServerTestCase):
     def clear_email_for_address(self, email_address, content_filter=None):
         from imapclient import IMAPClient
         server = IMAPClient(IMAP_HOST, ssl=True)
-        messages_to_delete = []
-        for m_id, parsed_headers, body_text in self.all_emails(server):
-            if email_address in parsed_headers['To']:
-                if content_filter is None or content_filter in body_text:
-                    messages_to_delete.append(m_id)
+        messages_to_delete = [
+            m_id
+            for m_id, parsed_headers, body_text in self.all_emails(server)
+            if email_address in parsed_headers['To']
+            and (content_filter is None or content_filter in body_text)
+        ]
         server.delete_messages(messages_to_delete)
 
 

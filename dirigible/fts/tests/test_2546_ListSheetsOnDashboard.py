@@ -21,11 +21,9 @@ class Test_2546_ListSheetsOnDashboard(FunctionalTest):
 
     def assert_sheet_is_listed(self, sheet_id, sheet_name=None):
         if sheet_name is None:
-            sheet_name = 'Sheet %s' % (sheet_id,)
-        expected_url = '/user/%s/sheet/%s/' % (self.get_my_username(), sheet_id)
-        link_text = self.get_text(
-            'css=a[href="%s"]' % (expected_url,))
-            # "xpath=//a[contains(@href, '%s')]" % (expected_url,))
+            sheet_name = f'Sheet {sheet_id}'
+        expected_url = f'/user/{self.get_my_username()}/sheet/{sheet_id}/'
+        link_text = self.get_text(f'css=a[href="{expected_url}"]')
         self.assertEquals(link_text, sheet_name)
 
 

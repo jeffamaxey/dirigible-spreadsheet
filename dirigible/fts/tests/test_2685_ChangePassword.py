@@ -121,7 +121,7 @@ class Test_2685_ChangePassword(FunctionalTest):
         self.login(password='newpassword')
 
         # It works.
-        expected = "%s's Dashboard: Dirigible" % (self.get_my_username(),)
+        expected = f"{self.get_my_username()}'s Dashboard: Dirigible"
         self.assertEquals(self.browser.title, expected)
 
         # He celebrates.

@@ -3164,60 +3164,100 @@ class ParseTreeTest(unittest.TestCase):
             return FLRoot(["=", TestFromFlReferenceChildren([Atom([Name([nameChild])]), Trailer(trailers)])])
 
         upper = functionName.upper()
-        self.assertCannotParse("=%s" % upper, -1, "")
-        self.assertCannotParse("=%s()" % upper, len(upper) + 3, ")")
+        self.assertCannotParse(f"={upper}", -1, "")
+        self.assertCannotParse(f"={upper}()", len(upper) + 3, ")")
         self.assertParsesToTree(
-            "=%s(1)" % upper,
-            CreateParseTree(upper, ['(', ArgList([Argument([TestFromAtomChild(Number(["1"]))])]), ')'])
-            )
+            f"={upper}(1)",
+            CreateParseTree(
+                upper,
+                [
+                    '(',
+                    ArgList([Argument([TestFromAtomChild(Number(["1"]))])]),
+                    ')',
+                ],
+            ),
+        )
         self.assertParsesToTree(
-            "=%s(1, 2, 3)" % functionName,
-            CreateParseTree(functionName,
-                ['(', ArgList([
-                    Argument([TestFromAtomChild(Number(["1"]))]),
-                    ', ',
-                    Argument([TestFromAtomChild(Number(["2"]))]),
-                    ', ',
-                    Argument([TestFromAtomChild(Number(["3"]))])
-                    ]),
-                 ')'])
-            )
+            f"={functionName}(1, 2, 3)",
+            CreateParseTree(
+                functionName,
+                [
+                    '(',
+                    ArgList(
+                        [
+                            Argument([TestFromAtomChild(Number(["1"]))]),
+                            ', ',
+                            Argument([TestFromAtomChild(Number(["2"]))]),
+                            ', ',
+                            Argument([TestFromAtomChild(Number(["3"]))]),
+                        ]
+                    ),
+                    ')',
+                ],
+            ),
+        )
 
         self.assertParsesToTree(
-            "=%s(A1)" % functionName.title(),
-            CreateParseTree(functionName.title(),
-                ['(', ArgList([
-                    ArgumentFromFLReferenceChild(FLCellReference(["A1"]))]),
-                 ')'])
-            )
+            f"={functionName.title()}(A1)",
+            CreateParseTree(
+                functionName.title(),
+                [
+                    '(',
+                    ArgList(
+                        [ArgumentFromFLReferenceChild(FLCellReference(["A1"]))]
+                    ),
+                    ')',
+                ],
+            ),
+        )
 
         self.assertParsesToTree(
-            "=%s(A1:B1)" % upper,
-            CreateParseTree(upper,
-                ['(', ArgList([
-                    ArgumentFromFLReferenceChild(
-                        FLCellRange(
-                            [
-                            FLCellReference(["A1"]),
-                            ":",
-                            FLCellReference(["B1"])
-                            ]))]),
-                 ')'])
-            )
+            f"={upper}(A1:B1)",
+            CreateParseTree(
+                upper,
+                [
+                    '(',
+                    ArgList(
+                        [
+                            ArgumentFromFLReferenceChild(
+                                FLCellRange(
+                                    [
+                                        FLCellReference(["A1"]),
+                                        ":",
+                                        FLCellReference(["B1"]),
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                    ')',
+                ],
+            ),
+        )
 
         self.assertParsesToTree(
-            "=%s(6 and 6, A3)" % upper,
-            CreateParseTree(upper,
-                ['(', ArgList([
-                    Argument([
-                        CreateAndTest(Number(["6 "]), "and ", Number(["6"]))
-                        ]),
-
-                    ", ",
-                    ArgumentFromFLReferenceChild(FLCellReference(["A3"]))
-                    ]),
-                 ')'])
-            )
+            f"={upper}(6 and 6, A3)",
+            CreateParseTree(
+                upper,
+                [
+                    '(',
+                    ArgList(
+                        [
+                            Argument(
+                                [
+                                    CreateAndTest(
+                                        Number(["6 "]), "and ", Number(["6"])
+                                    )
+                                ]
+                            ),
+                            ", ",
+                            ArgumentFromFLReferenceChild(FLCellReference(["A3"])),
+                        ]
+                    ),
+                    ')',
+                ],
+            ),
+        )
 
 
     def testCannotUseInappropriate(self):

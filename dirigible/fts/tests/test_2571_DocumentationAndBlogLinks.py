@@ -11,7 +11,7 @@ from functionaltest import FunctionalTest, Url
 class Test_2571_Documentation(FunctionalTest):
 
     def get_link_href(self, link_id):
-        url = self.selenium.get_attribute("id=%s@href" % (link_id,))
+        url = self.selenium.get_attribute(f"id={link_id}@href")
         return urljoin(Url.ROOT, url)
 
 

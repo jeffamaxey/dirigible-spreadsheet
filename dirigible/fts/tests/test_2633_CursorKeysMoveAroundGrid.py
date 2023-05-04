@@ -12,8 +12,16 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
 
     def get_cell_editor_cursor_position(self):
         try:
-            selection_start = int(self.selenium.get_eval("window.$('%s').caret().start" % (self.get_cell_editor_css(),)))
-            selection_end = int(self.selenium.get_eval("window.$('%s').caret().end" % (self.get_cell_editor_css(),)))
+            selection_start = int(
+                self.selenium.get_eval(
+                    f"window.$('{self.get_cell_editor_css()}').caret().start"
+                )
+            )
+            selection_end = int(
+                self.selenium.get_eval(
+                    f"window.$('{self.get_cell_editor_css()}').caret().end"
+                )
+            )
         except ValueError:
             return None
         self.assertEquals(selection_start, selection_end, "Time to refactor?")
@@ -226,8 +234,8 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
         # He notes that the cell shifts into edit mode (though it remains empty)
         full_editor_locator = self.get_cell_editor_locator(2, 1)
         self.wait_for(
-            lambda : self.is_element_present(full_editor_locator),
-            lambda : "Editor at (%s, %s) to be present" % (2, 1),
+            lambda: self.is_element_present(full_editor_locator),
+            lambda: 'Editor at (2, 1) to be present',
         )
         self.wait_for_cell_editor_content("")
 
@@ -250,8 +258,8 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
         # He notes that the cell shifts into edit mode and shows the formula.
         full_editor_locator = self.get_cell_editor_locator(1, 1)
         self.wait_for(
-            lambda : self.is_element_present(full_editor_locator),
-            lambda : "Editor at (%s, %s) to be present" % (1, 1),
+            lambda: self.is_element_present(full_editor_locator),
+            lambda: 'Editor at (1, 1) to be present',
         )
         self.wait_for_cell_editor_content("=4567")
 
@@ -425,12 +433,16 @@ class Test_2633_CursorKeysMoveAroundGrid(FunctionalTest):
         self.enter_cell_text(1, 1, "foo")
 
         # * He gets out a ruler and measures the text height
-        cell_font_size_expression = "window.$('%s').css('font-size')" % (self.get_cell_css(1, 1),)
+        cell_font_size_expression = (
+            f"window.$('{self.get_cell_css(1, 1)}').css('font-size')"
+        )
         cell_font_size = self.selenium.get_eval(cell_font_size_expression)
 
         # * He edits the cell again, and measures the height again while still editing
         self.open_cell_for_editing(1, 1)
-        editor_font_size_expression = "window.$('%s').css('font-size')" % (self.get_cell_editor_css(),)
+        editor_font_size_expression = (
+            f"window.$('{self.get_cell_editor_css()}').css('font-size')"
+        )
         editor_font_size = self.selenium.get_eval(editor_font_size_expression)
 
         # * He is pleased to discover the two measured heights are the same.

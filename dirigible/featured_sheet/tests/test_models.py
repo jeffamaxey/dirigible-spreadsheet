@@ -53,5 +53,5 @@ class TestFeaturedSheetModel(ResolverTestCase):
         fs = FeaturedSheet(sheet=sheet, description=description, more_info_url=more_info_url)
         fs.save()
 
-        self.assertEquals(unicode(fs), u'Feature: %s' % (sheet.name,))
+        self.assertEquals(unicode(fs), f'Feature: {sheet.name}')
 

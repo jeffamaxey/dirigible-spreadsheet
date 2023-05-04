@@ -134,10 +134,11 @@ class TestRewriteFormulaOffsetCellReferences(unittest.TestCase):
         cell_range_bottomright = "B3"
 
         result = rewrite_formula(
-            "=%s:%s" % (cell_range_topleft, cell_range_bottomright),
-            2, 1,
+            f"={cell_range_topleft}:{cell_range_bottomright}",
+            2,
+            1,
             True,
-            (cut_region_left, cut_region_top, cut_region_right, cut_region_bottom)
+            (cut_region_left, cut_region_top, cut_region_right, cut_region_bottom),
         )
         self.assertEquals(result, '=A2:B3')
 
@@ -152,10 +153,11 @@ class TestRewriteFormulaOffsetCellReferences(unittest.TestCase):
         cell_range_bottomright = "$B$3"
 
         result = rewrite_formula(
-            "=%s:%s" % (cell_range_topleft, cell_range_bottomright),
-            2, 1,
+            f"={cell_range_topleft}:{cell_range_bottomright}",
+            2,
+            1,
             True,
-            (cut_region_left, cut_region_top, cut_region_right, cut_region_bottom)
+            (cut_region_left, cut_region_top, cut_region_right, cut_region_bottom),
         )
         self.assertEquals(result, '=$A$2:$B$3')
 

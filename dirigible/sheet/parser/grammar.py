@@ -96,10 +96,7 @@ def p__partial_varargslist_starting_with_doublestar(p):
 def p__partial_varargslist_starting_with_star(p):
     """_partial_varargslist_starting_with_star : STAR _name
                                                | STAR _name COMMA _partial_varargslist_starting_with_doublestar"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = [p[1], p[2], p[3]] + p[4]
+    p[0] = [p[1], p[2]] if len(p) == 3 else [p[1], p[2], p[3]] + p[4]
 
 
 def p__partial_varargslist_starting_with_keyword(p):
@@ -107,10 +104,7 @@ def p__partial_varargslist_starting_with_keyword(p):
                                                   | fpdef COLONEQUALS test COMMA
                                                   | fpdef COLONEQUALS test COMMA _partial_varargslist_starting_with_doublestar
                                                   | fpdef COLONEQUALS test COMMA _partial_varargslist_starting_with_star"""
-    if len(p) < 6:
-        p[0] = p[1:]
-    else:
-        p[0] = [p[1], p[2], p[3], p[4]] + p[5]
+    p[0] = p[1:] if len(p) < 6 else [p[1], p[2], p[3], p[4]] + p[5]
 
 
 def p__partial_varargslist_starting_with_fpdef(p):
@@ -120,10 +114,7 @@ def p__partial_varargslist_starting_with_fpdef(p):
                                                 | fpdef COMMA _partial_varargslist_starting_with_star
                                                 | fpdef COMMA _partial_varargslist_starting_with_keyword
                                                 | fpdef COMMA _partial_varargslist_starting_with_fpdef"""
-    if len(p) < 4:
-        p[0] = p[1:]
-    else:
-        p[0] = [p[1], p[2]] + p[3]
+    p[0] = p[1:] if len(p) < 4 else [p[1], p[2]] + p[3]
 
 
 def p_fpdef(p):
@@ -152,74 +143,50 @@ def p_fplist(p):
 def p__comma_fpdefs(p):
     """_comma_fpdefs : COMMA fpdef
                      | _comma_fpdefs COMMA fpdef"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_test(p):
     """test : and_test
             | and_test _or_and_tests
             | lambdef"""
-    if len(p) == 2:
-        p[0] = Test([p[1]])
-    else:
-        p[0] = Test([p[1]] + p[2])
+    p[0] = Test([p[1]]) if len(p) == 2 else Test([p[1]] + p[2])
 
 
 def p__or_and_tests(p):
     """_or_and_tests : OR and_test
                      | _or_and_tests OR and_test"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_and_test(p):
     """and_test : not_test
                 | not_test _and_not_tests"""
-    if len(p) == 2:
-        p[0] = AndTest([p[1]])
-    else:
-        p[0] = AndTest([p[1]] + p[2])
+    p[0] = AndTest([p[1]]) if len(p) == 2 else AndTest([p[1]] + p[2])
 
 
 def p__and_not_tests(p):
     """_and_not_tests : AND not_test
                       | _and_not_tests AND not_test"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_not_test(p):
     """not_test : comparison
                 | NOT not_test"""
-    if len(p) == 2:
-        p[0] = NotTest([p[1]])
-    else:
-        p[0] = NotTest([p[1], p[2]])
+    p[0] = NotTest([p[1]]) if len(p) == 2 else NotTest([p[1], p[2]])
 
 
 def p_comparison(p):
     """comparison : expr
                   | expr _comp_operator_exprs"""
-    if len(p) == 2:
-        p[0] = Comparison([p[1]])
-    else:
-        p[0] = Comparison([p[1]] + p[2])
+    p[0] = Comparison([p[1]]) if len(p) == 2 else Comparison([p[1]] + p[2])
 
 
 def p__comp_operator_exprs(p):
     """_comp_operator_exprs : comp_operator expr
                             | _comp_operator_exprs comp_operator expr"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_comp_operator(p):
@@ -235,55 +202,37 @@ def p_comp_operator(p):
                      | IN
                      | IS NOT
                      | NOT IN"""
-    if len(p) == 2:
-        p[0] = CompOperator([p[1]])
-    else:
-        p[0] = CompOperator([p[1] + p[2]])
+    p[0] = CompOperator([p[1]]) if len(p) == 2 else CompOperator([p[1] + p[2]])
 
 
 def p_expr(p):
     """expr : concat_expr
             | concat_expr _or_concat_exprs"""
-    if len(p) == 2:
-        p[0] = Expr([p[1]])
-    else:
-        p[0] = Expr([p[1]] + p[2])
+    p[0] = Expr([p[1]]) if len(p) == 2 else Expr([p[1]] + p[2])
 
 
 def p__or_concat_exprs(p):
     """_or_concat_exprs : VERTICALBAR concat_expr
                      | _or_concat_exprs VERTICALBAR concat_expr"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_concat_expr(p):
     """concat_expr : shift_expr
                 | shift_expr _ampersand_shift_exprs"""
-    if len(p) == 2:
-        p[0] = ConcatExpr([p[1]])
-    else:
-        p[0] = ConcatExpr([p[1]] + p[2])
+    p[0] = ConcatExpr([p[1]]) if len(p) == 2 else ConcatExpr([p[1]] + p[2])
 
 
 def p__ampersand_shift_exprs(p):
     """_ampersand_shift_exprs : AMPERSAND shift_expr
                               | _ampersand_shift_exprs AMPERSAND shift_expr"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_shift_expr(p):
     """shift_expr : arith_expr
                   | arith_expr _shift_op_arith_exprs"""
-    if len(p) == 2:
-        p[0] = ShiftExpr([p[1]])
-    else:
-        p[0] = ShiftExpr([p[1]]+ p[2])
+    p[0] = ShiftExpr([p[1]]) if len(p) == 2 else ShiftExpr([p[1]]+ p[2])
 
 
 def p__shift_op_arith_exprs(p):
@@ -291,19 +240,13 @@ def p__shift_op_arith_exprs(p):
                              | RIGHTSHIFT arith_expr
                              | _shift_op_arith_exprs LEFTSHIFT arith_expr
                              | _shift_op_arith_exprs RIGHTSHIFT arith_expr"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_arith_expr(p):
     """arith_expr : term
                   | term _a_op_terms"""
-    if len(p) == 2:
-        p[0] = ArithExpr([p[1]])
-    else:
-        p[0] = ArithExpr([p[1]] + p[2])
+    p[0] = ArithExpr([p[1]]) if len(p) == 2 else ArithExpr([p[1]] + p[2])
 
 
 def p__a_op_terms(p):
@@ -311,19 +254,13 @@ def p__a_op_terms(p):
                    | MINUS term
                    | _a_op_terms PLUS term
                    | _a_op_terms MINUS term"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_term(p):
     """term : percent
             | percent _m_op_factors"""
-    if len(p) == 2:
-        p[0] = Term([p[1]])
-    else:
-        p[0] = Term([p[1]] + p[2])
+    p[0] = Term([p[1]]) if len(p) == 2 else Term([p[1]] + p[2])
 
 
 def p__m_op_factors(p):
@@ -335,18 +272,12 @@ def p__m_op_factors(p):
                       | _m_op_factors SLASH percent
                       | _m_op_factors DOUBLESLASH percent
                       | _m_op_factors MOD_ITERP percent"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 def p_percent(p):
     """percent : factor
                | percent PERCENT"""
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = Percent(p[1:])
+    p[0] = p[1] if len(p) == 2 else Percent(p[1:])
 
 def p_factor(p):
     """factor : power
@@ -360,10 +291,7 @@ def p_power(p):
     """power : fl_reference
              | fl_reference DOUBLESTAR factor
              | fl_reference CIRCUMFLEX factor"""
-    if len(p) == 2:
-        p[0] = Power([p[1]])
-    else:
-        p[0] = Power([p[1], p[2], p[3]])
+    p[0] = Power([p[1]]) if len(p) == 2 else Power([p[1], p[2], p[3]])
 
 
 def p_atom(p):
@@ -383,10 +311,7 @@ def p_atom(p):
 def p_listmaker(p):
     """listmaker : testlist
                  | test list_for"""
-    if len(p) == 2:
-        p[0] = ListMaker(p[1].children)
-    else:
-        p[0] = ListMaker([p[1], p[2]])
+    p[0] = ListMaker(p[1].children) if len(p) == 2 else ListMaker([p[1], p[2]])
 
 
 def p_testlist_gexp(p):
@@ -424,10 +349,7 @@ def p_trailer(p):
 def p__trailers(p):
     """_trailers : trailer
                  | _trailers trailer"""
-    if len(p) == 2:
-        p[0] = [p[1]]
-    else:
-        p[0] = p[1] + [p[2]]
+    p[0] = [p[1]] if len(p) == 2 else p[1] + [p[2]]
 
 
 def p_subscriptlist(p):
@@ -449,10 +371,7 @@ def p_subscriptlist(p):
 def p__comma_subscripts(p):
     """_comma_subscripts : COMMA subscript
                          | _comma_subscripts COMMA subscript"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_subscript(p):
@@ -470,10 +389,7 @@ def p__simple_subscript(p):
 def p__complex_subscript(p):
     """_complex_subscript : _short_slice
                           | _short_slice sliceop"""
-    if len(p) == 2:
-        p[0] = Subscript(p[1])
-    else:
-        p[0] = Subscript(p[1] + [p[2]])
+    p[0] = Subscript(p[1]) if len(p) == 2 else Subscript(p[1] + [p[2]])
 
 
 def p__short_slice(p):
@@ -519,10 +435,7 @@ def p_exprlist(p):
 def p__comma_exprs(p):
     """_comma_exprs : COMMA expr
                     | _comma_exprs COMMA expr"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_testlist(p):
@@ -544,10 +457,7 @@ def p_testlist(p):
 def p__comma_tests(p):
     """_comma_tests : COMMA test
                     | _comma_tests COMMA test"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = p[1] + [p[2], p[3]]
+    p[0] = [p[1], p[2]] if len(p) == 3 else p[1] + [p[2], p[3]]
 
 
 def p_testlist_safe(p):
@@ -586,10 +496,7 @@ def p__key_value_pair(p):
 def p__comma_key_value_pairs(p):
     """_comma_key_value_pairs : COMMA _key_value_pair
                               | _comma_key_value_pairs COMMA _key_value_pair"""
-    if len(p) == 3:
-        p[0] = [p[1]] + p[2]
-    else:
-        p[0] = p[1] + [p[2]] + p[3]
+    p[0] = [p[1]] + p[2] if len(p) == 3 else p[1] + [p[2]] + p[3]
 
 
 def p_arglist(p):
@@ -608,10 +515,7 @@ def p__partial_arglist_starting_with_doublestar(p):
 def p__partial_arglist_starting_with_star(p):
     """_partial_arglist_starting_with_star : STAR test
                                            | STAR test COMMA _partial_arglist_starting_with_doublestar"""
-    if len(p) == 3:
-        p[0] = [p[1], p[2]]
-    else:
-        p[0] = [p[1], p[2], p[3]] + p[4]
+    p[0] = [p[1], p[2]] if len(p) == 3 else [p[1], p[2], p[3]] + p[4]
 
 
 def p__partial_arglist_starting_with_keyword(p):
@@ -619,10 +523,7 @@ def p__partial_arglist_starting_with_keyword(p):
                                               | _keyword_argument COMMA _partial_arglist_starting_with_doublestar
                                               | _keyword_argument COMMA _partial_arglist_starting_with_star
                                               | _keyword_argument COMMA _partial_arglist_starting_with_keyword"""
-    if len(p) < 4:
-        p[0] = p[1:]
-    else:
-        p[0] = [p[1], p[2]] + p[3]
+    p[0] = p[1:] if len(p) < 4 else [p[1], p[2]] + p[3]
 
 
 def p__partial_arglist_starting_with_argument(p):
@@ -698,10 +599,7 @@ def p_gen_if(p):
 def p_testlist1(p):
     """testlist1 : test
                  | test _comma_tests"""
-    if len(p) == 2:
-        p[0] = TestList([p[1]])
-    else:
-        p[0] = TestList([p[1]] + p[2])
+    p[0] = TestList([p[1]]) if len(p) == 2 else TestList([p[1]] + p[2])
 
 
 def p__name(p):
@@ -814,10 +712,7 @@ def p_fl_reference(p):
                     | fl_deleted_reference
                     | fl_invalid_reference
                     | fl_dde_call"""
-    if isinstance(p[1], ParseNode):
-        firstChildren = [p[1]]
-    else:
-        firstChildren = p[1]
+    firstChildren = [p[1]] if isinstance(p[1], ParseNode) else p[1]
     if len(p) == 2:
         p[0] = FLReference(firstChildren)
     elif len(p) == 3:
@@ -843,9 +738,13 @@ def p_fl_cell_range(p):
     if p[3].type not in types:
         raise FormulaError("Error in formula at position %d: unexpected '%s'" % (p.lexer.lexpos - len(p[3].flatten()) - 1, p[3].flatten()))
 
-    if p[1].type == ParseNode.FL_CELL_REFERENCE and p[3].type == ParseNode.FL_CELL_REFERENCE:
-        if len(p[1].children) == 3 and len(p[3].children) == 1:
-            p[3].children[:0] = p[1].children[:2]
+    if (
+        p[1].type == ParseNode.FL_CELL_REFERENCE
+        and p[3].type == ParseNode.FL_CELL_REFERENCE
+        and len(p[1].children) == 3
+        and len(p[3].children) == 1
+    ):
+        p[3].children[:0] = p[1].children[:2]
 
     p[0] = FLCellRange([p[1], p[2], p[3]])
 
@@ -867,7 +766,7 @@ def _interpretHorribleFLReferenceMess(p, simpleInterpreter):
             return
         else:
             worksheetName, cellName = p_1.rsplit('!', 1)
-            exclamationMark = '!' + get_lstripped_part(cellName)
+            exclamationMark = f'!{get_lstripped_part(cellName)}'
             cellName = cellName.lstrip()
     else:
         worksheetName = GetWorksheetNameFromPotentialNakedWorksheetReference(p_1)
@@ -981,7 +880,13 @@ def p_fl_deleted_reference(p):
         else:
             worksheetReference, deletedReference = p[1].rsplit('#', 1)
             worksheetName, exclamationWhitespace = worksheetReference.rsplit('!', 1)
-            p[0] = FLDeletedReference([worksheetName, '!' + exclamationWhitespace, '#' + deletedReference])
+            p[0] = FLDeletedReference(
+                [
+                    worksheetName,
+                    f'!{exclamationWhitespace}',
+                    f'#{deletedReference}',
+                ]
+            )
     else:
         worksheetName = GetWorksheetNameFromPotentialNakedWorksheetReference(p[1])
         p[0] = FLDeletedReference([worksheetName, p[2], p[3]])
@@ -1001,7 +906,13 @@ def p_fl_invalid_reference(p):
         else:
             worksheetReference, invalidReference = p[1].rsplit('#', 1)
             worksheetName, exclamationWhitespace = worksheetReference.rsplit('!', 1)
-            p[0] = FLInvalidReference([worksheetName, '!' + exclamationWhitespace, '#' + invalidReference])
+            p[0] = FLInvalidReference(
+                [
+                    worksheetName,
+                    f'!{exclamationWhitespace}',
+                    f'#{invalidReference}',
+                ]
+            )
     else:
         worksheetName = GetWorksheetNameFromPotentialNakedWorksheetReference(p[1])
         p[0] = FLInvalidReference([worksheetName, p[2], p[3]])
@@ -1013,9 +924,9 @@ def p_fl_naked_worksheet_reference(p):
                                     | FLNAKEDWORKSHEETREFERENCE"""
     if len(p) == 2:
         name, greaterThanWhitespace = p[1].rsplit(">", 1)
-        greaterThan = ">" + greaterThanWhitespace
+        greaterThan = f">{greaterThanWhitespace}"
         lessThanWhitespace = get_lstripped_part(name[1:])
-        lessThan = "<" + lessThanWhitespace
+        lessThan = f"<{lessThanWhitespace}"
         name = name[1:].lstrip()
         p[0] = FLNakedWorksheetReference([lessThan, name, greaterThan])
     else:

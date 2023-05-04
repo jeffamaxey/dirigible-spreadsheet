@@ -24,19 +24,13 @@ def sheet_to_ui_json_meta_data(sheet, worksheet):
 
 
 def sheet_to_ui_json_grid_data(worksheet, rnge):
-    result = {}
     left, topmost, right, bottom = rnge
-    result['left'] = left
-    result['topmost'] = topmost
-    result['right'] = right
-    result['bottom'] = bottom
+    result = {'left': left, 'topmost': topmost, 'right': right, 'bottom': bottom}
     for (col, row), cell in worksheet.items():
-        if rnge is not None:
-            if (
-                col < left or col > right or
-                row < topmost or row > bottom
-            ):
-                continue
+        if rnge is not None and (
+            col < left or col > right or row < topmost or row > bottom
+        ):
+            continue
         cell_content = {}
         if cell.formula is not None:
             cell_content['formula'] = cell.formula

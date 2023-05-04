@@ -24,7 +24,7 @@ class Test_2540_FrontPage(FunctionalTest):
         num_tags = self.selenium.get_xpath_count(tag_xpath)
         base_file_location = self.browser.current_url
         for i in range(1, num_tags + 1):
-            src = self.selenium.get_attribute("xpath=(%s)[%s]@%s" % (tag_xpath, i, attribute))
+            src = self.selenium.get_attribute(f"xpath=({tag_xpath})[{i}]@{attribute}")
             url = urlparse.urljoin(base_file_location, src)
             if not url.startswith("mailto:"):
                 self.check_url_not_broken(url)
@@ -32,7 +32,7 @@ class Test_2540_FrontPage(FunctionalTest):
 
     def test_front_page_links(self):
         # Harold goes to Dirigible's root page
-        self.go_to_url('http://%s/' % (SERVER_IP,))
+        self.go_to_url(f'http://{SERVER_IP}/')
 
         # He finds a page with the title  "Welcome to Dirigible"
         self.assertEquals(self.browser.title, 'Welcome to Dirigible')

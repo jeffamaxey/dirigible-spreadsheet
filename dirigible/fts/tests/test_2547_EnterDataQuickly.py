@@ -16,11 +16,11 @@ class Test_2547_EnterDataQuickly(FunctionalTest):
 
         # * He enters 20 numbers quickly
         for row in range(1, 21):
-            self.enter_cell_text_unhumanized(1, row, "%s" % (row,))
+            self.enter_cell_text_unhumanized(1, row, f"{row}")
 
         # * He checks that they are all there.
         for row in range(1, 21):
-            self.wait_for_cell_value(1, row, "%s" % (row,))
+            self.wait_for_cell_value(1, row, f"{row}")
 
 
     @snapshot_on_error
@@ -34,11 +34,11 @@ class Test_2547_EnterDataQuickly(FunctionalTest):
 
         # * He enters 20 numbers quickly, taking a brief rest every five numbers
         for row in range(1, 21):
-            self.enter_cell_text_unhumanized(1, row, "%s" % (row,))
+            self.enter_cell_text_unhumanized(1, row, f"{row}")
             if row % 5 == 0:
                 time.sleep(2)
 
         # * He checks that they are all there.
         for row in range(1, 21):
-            self.wait_for_cell_value(1, row, "%s" % (row,))
+            self.wait_for_cell_value(1, row, f"{row}")
 

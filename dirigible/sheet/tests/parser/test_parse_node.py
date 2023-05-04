@@ -38,7 +38,7 @@ class ParseNodeTest(unittest.TestCase):
         self.assertTrue(node2 != node3, "Nodes expected to be unequal were not")
 
         node4 = Expr([Name(5)])
-        self.assertFalse(node3 == None, "Nodes not expected to be equal were (None)")
+        self.assertFalse(node3 is None, "Nodes not expected to be equal were (None)")
         self.assertFalse(node3 == node4, "Nodes not expected to be equal were (unsized)")
         self.assertFalse(node4 == node3, "Nodes not expected to be equal were (unsized)")
         self.assertFalse(node4 == "hello", "Nodes not expected to be equal were (type)")

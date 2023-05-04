@@ -166,8 +166,9 @@ class WorksheetFromExcelTest(ResolverTestCase):
         mock_excel_worksheet = Mock()
         def mock_cell(row, col):
             mock_cell = Mock()
-            mock_cell.value = '%s, %s' % (col, row)
+            mock_cell.value = f'{col}, {row}'
             return mock_cell
+
         mock_excel_worksheet.cell.side_effect = mock_cell
         mock_excel_worksheet.nrows = 4
         mock_excel_worksheet.ncols = 3
@@ -176,7 +177,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
 
         for col in range(mock_excel_worksheet.ncols):
             for row in range(mock_excel_worksheet.nrows):
-                self.assertEquals(worksheet[col + 1, row + 1].formula, '%s, %s' % (col, row))
+                self.assertEquals(worksheet[col + 1, row + 1].formula, f'{col}, {row}')
 
 
     def test_populates_worksheet_handles_float_source_values(self):
@@ -185,6 +186,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
             mock_cell = Mock()
             mock_cell.value = col + row + 0.1
             return mock_cell
+
         mock_excel_worksheet.cell.side_effect = mock_cell
         mock_excel_worksheet.nrows = 4
         mock_excel_worksheet.ncols = 3
@@ -193,7 +195,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
 
         for col in range(mock_excel_worksheet.ncols):
             for row in range(mock_excel_worksheet.nrows):
-                self.assertEquals(worksheet[col + 1, row + 1].formula, '%s' % (col + row + 0.1, ))
+                self.assertEquals(worksheet[col + 1, row + 1].formula, f'{col + row + 0.1}')
 
 
     @patch('sheet.importer.xldate_as_tuple')
@@ -204,6 +206,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
             mock_cell.ctype = xlrd.XL_CELL_DATE
             mock_cell.value = (row, col)
             return mock_cell
+
         mock_excel_worksheet.cell.side_effect = mock_cell
         mock_excel_worksheet.nrows = 4
         mock_excel_worksheet.ncols = 3
@@ -212,6 +215,7 @@ class WorksheetFromExcelTest(ResolverTestCase):
             row, col = cell_value
             self.assertEquals(datemode, mock_excel_worksheet.book.datemode)
             return (2011, row, col, 1, 2, 3)
+
         mock_xlrd_date_as_tuple.side_effect = mock_xlrd_date_as_tuple_function
 
         worksheet = worksheet_from_excel(mock_excel_worksheet)
@@ -219,8 +223,8 @@ class WorksheetFromExcelTest(ResolverTestCase):
         for col in range(mock_excel_worksheet.ncols):
             for row in range(mock_excel_worksheet.nrows):
                 self.assertEquals(
-                        worksheet[col + 1, row + 1].formula,
-                        '=DateTime(2011, %s, %s, 1, 2, 3)' % (row, col)
+                    worksheet[col + 1, row + 1].formula,
+                    f'=DateTime(2011, {row}, {col}, 1, 2, 3)',
                 )
 
 

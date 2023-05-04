@@ -71,7 +71,7 @@ def worksheet_from_excel(excel_sheet):
         for row in range(excel_sheet.nrows):
             cell = excel_sheet.cell(row, col)
             if cell.ctype == XL_CELL_ERROR:
-                formula = '=%s' % (error_text_from_code[cell.value], )
+                formula = f'={error_text_from_code[cell.value]}'
             elif cell.ctype == XL_CELL_DATE:
                 formula = '=DateTime(%s, %s, %s, %s, %s, %s)' % xldate_as_tuple(
                     cell.value, excel_sheet.book.datemode)

@@ -14,11 +14,11 @@ class Test_2537_save_column_widths(FunctionalTest):
 
 
     def get_column_header_locator(self, column_name):
-        return 'css=div[title=%s]' % (column_name,)
+        return f'css=div[title={column_name}]'
 
 
     def get_column_resize_handle_locator(self, column_name):
-        return "%s div.slick-resizable-handle" % (self.get_column_header_locator(column_name),)
+        return f"{self.get_column_header_locator(column_name)} div.slick-resizable-handle"
 
 
     def get_column_width(self, column_name):
@@ -28,7 +28,7 @@ class Test_2537_save_column_widths(FunctionalTest):
     def wait_for_column_width(self, column_name, width):
         self.wait_for(
             lambda: self.get_column_width(column_name) == width,
-            lambda: 'column %s width to become %s (was %s)' % (column_name, width, self.get_column_width(column_name))
+            lambda: f'column {column_name} width to become {width} (was {self.get_column_width(column_name)})',
         )
 
 

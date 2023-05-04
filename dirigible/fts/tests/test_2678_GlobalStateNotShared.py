@@ -21,7 +21,7 @@ class Test_2678_GlobalStateNotShared(FunctionalTest):
 
             window_ids = []
             for sheet_number in range(number_of_windows):
-                window_id = "sheet_window_%s" % (sheet_number,)
+                window_id = f"sheet_window_{sheet_number}"
                 self.selenium.open_window(Url.NEW_SHEET, window_id)
                 self.selenium.wait_for_pop_up(window_id, timeout=20000)
                 self.selenium.select_window(window_id)

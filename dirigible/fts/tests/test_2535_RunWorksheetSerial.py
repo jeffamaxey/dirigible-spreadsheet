@@ -22,7 +22,7 @@ class Test_2535_RunWorksheet(FunctionalTest):
         self.create_new_sheet()
 
         # * He enters =run_worksheet('http://...') into A1
-        self.enter_cell_text(1, 1, '=run_worksheet("%s")' % (target_sheet_url,))
+        self.enter_cell_text(1, 1, f'=run_worksheet("{target_sheet_url}")')
 
         # * He enters =A1[3, 3] into A2 and notes that
         self.enter_cell_text(1, 2, '=A1[3, 3].value')
@@ -51,7 +51,9 @@ class Test_2535_RunWorksheet(FunctionalTest):
             (1, 3): '=str(A1)'
         }
         overrides_in_formula = repr(overrides).replace(':', '->')
-        self.enter_cell_text(1, 1, '=run_worksheet("%s", %s)' % (target_sheet_url, overrides_in_formula))
+        self.enter_cell_text(
+            1, 1, f'=run_worksheet("{target_sheet_url}", {overrides_in_formula})'
+        )
 
 
         #   the value from C3 in the first sheet appears there
@@ -82,7 +84,9 @@ class Test_2535_RunWorksheet(FunctionalTest):
             (1, 3): '=str(A1)'
         }
         overrides_in_formula = repr(overrides).replace(':', '->')
-        self.enter_cell_text(1, 1, '=run_worksheet("%s", %s)' % (target_sheet_url, overrides_in_formula))
+        self.enter_cell_text(
+            1, 1, f'=run_worksheet("{target_sheet_url}", {overrides_in_formula})'
+        )
 
         # ... and notes the error shown in A1
         self.assert_cell_has_error(1, 1, 'Exception: run_worksheet: Syntax error at character 11')

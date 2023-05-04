@@ -96,9 +96,9 @@ tokens = (
 WHITESPACE    = r'[ \t]*'
 STRINGPREFIX  = r'(?:[uUrR]|[uU][rR])?'
 POINTFLOAT    = r'(?:[0-9]*\.[0-9]+|[0-9]+\.[0-9]*)'
-EXPONENTFLOAT = r'(?:[0-9]+|' + POINTFLOAT + ')[eE][+-]?[0-9]+'
-FLOATNUMBER   = r'(?:' + EXPONENTFLOAT + '|' + POINTFLOAT + ')'
-WORKSHEETNAME = r"'(?:[^']|'')*'" + WHITESPACE + '!' + WHITESPACE
+EXPONENTFLOAT = f'(?:[0-9]+|{POINTFLOAT})[eE][+-]?[0-9]+'
+FLOATNUMBER = f'(?:{EXPONENTFLOAT}|{POINTFLOAT})'
+WORKSHEETNAME = f"'(?:[^']|'')*'{WHITESPACE}!{WHITESPACE}"
 CELLREFLIKENAME = r'\$?[A-Za-z]+\$?[1-9][0-9]*'
 COLUMNREFLIKENAME = r'\$?[A-Za-z]+_'
 NAMEDCOLUMNREFERENCE = r'\#(?:[^\#]|\#\#)+\#_'
@@ -106,40 +106,40 @@ NAMEDROWREFERENCE = r'_\#(?:[^\#]|\#\#)+\#'
 ROWREFLIKENAME = r'_\$?[1-9][0-9]*'
 
 # Regexps for lower=precedence tokens
-t_EXCLAMATION      = r'!' + WHITESPACE
+t_EXCLAMATION = f'!{WHITESPACE}'
 t_PLUS             = r'\+' + WHITESPACE
-t_MINUS            = r'-' + WHITESPACE
-t_TILDE            = r'~' + WHITESPACE
+t_MINUS = f'-{WHITESPACE}'
+t_TILDE = f'~{WHITESPACE}'
 t_DOUBLESTAR       = r'\*\*' + WHITESPACE
 t_STAR             = r'\*' + WHITESPACE
-t_SLASH            = r'/' + WHITESPACE
-t_DOUBLESLASH      = r'//' + WHITESPACE
+t_SLASH = f'/{WHITESPACE}'
+t_DOUBLESLASH = f'//{WHITESPACE}'
 t_PERCENT          = r'\%' + WHITESPACE
 t_MOD_ITERP        = r'\%\%' + WHITESPACE
-t_LEFTSHIFT        = r'<<' + WHITESPACE
-t_RIGHTSHIFT       = r'>>' + WHITESPACE
-t_AMPERSAND        = r'&' + WHITESPACE
+t_LEFTSHIFT = f'<<{WHITESPACE}'
+t_RIGHTSHIFT = f'>>{WHITESPACE}'
+t_AMPERSAND = f'&{WHITESPACE}'
 t_CIRCUMFLEX       = r'\^' + WHITESPACE
 t_VERTICALBAR      = r'\|' + WHITESPACE
-t_LESSTHAN         = r'<' + WHITESPACE
-t_GREATERTHAN      = r'>' + WHITESPACE
-t_EQUALTO          = r'==' + WHITESPACE
-t_COLONEQUALS      = r':=' + WHITESPACE
-t_GREATEREQUAL     = r'>=' + WHITESPACE
-t_LESSEQUAL        = r'<=' + WHITESPACE
-t_UNEQUAL          = r'!=' + WHITESPACE
-t_OBSOLETEUNEQUAL  = r'<>' + WHITESPACE
-t_LITTLEARROW      = r'->' + WHITESPACE
-t_COLON            = r':' + WHITESPACE
+t_LESSTHAN = f'<{WHITESPACE}'
+t_GREATERTHAN = f'>{WHITESPACE}'
+t_EQUALTO = f'=={WHITESPACE}'
+t_COLONEQUALS = f':={WHITESPACE}'
+t_GREATEREQUAL = f'>={WHITESPACE}'
+t_LESSEQUAL = f'<={WHITESPACE}'
+t_UNEQUAL = f'!={WHITESPACE}'
+t_OBSOLETEUNEQUAL = f'<>{WHITESPACE}'
+t_LITTLEARROW = f'->{WHITESPACE}'
+t_COLON = f':{WHITESPACE}'
 t_LEFTPAREN        = r'\(' + WHITESPACE
 t_RIGHTPAREN       = r'\)' + WHITESPACE
 t_LEFTBRACE        = r'{' + WHITESPACE
 t_RIGHTBRACE       = r'}' + WHITESPACE
 t_LEFTBRACKET      = r'\[' + WHITESPACE
 t_RIGHTBRACKET     = r'\]' + WHITESPACE
-t_COMMA            = r',' + WHITESPACE
-t_EQUALS           = r'=' + WHITESPACE
-t_BACKWARDQUOTE    = r'`' + WHITESPACE
+t_COMMA = f',{WHITESPACE}'
+t_EQUALS = f'={WHITESPACE}'
+t_BACKWARDQUOTE = f'`{WHITESPACE}'
 t_DOT              = r'\.' + WHITESPACE
 t_ELLIPSIS         = r'\.\.\.' + WHITESPACE
 
@@ -156,8 +156,8 @@ def TokenRule(docstring):
 
 # Functions for tokens (which get higher precedence)
 
-@TokenRule(r"<'(?:[^']|'')*'>" + WHITESPACE)
-def t_FLNAKEDWORKSHEETREFERENCE(t) : return t
+@TokenRule(f"<'(?:[^']|'')*'>{WHITESPACE}")
+def t_FLNAKEDWORKSHEETREFERENCE(t): return t
 
 @TokenRule(WORKSHEETNAME + CELLREFLIKENAME + WHITESPACE)
 def t_LONGCELLREFERENCE(t): return t
@@ -180,19 +180,19 @@ def t_LONGDELETEDREFERENCE(t): return t
 @TokenRule(WORKSHEETNAME + t_FLINVALIDREFERENCE)
 def t_LONGINVALIDREFERENCE(t): return t
 
-@TokenRule(r'(?:' + FLOATNUMBER + '|[0-9]+)[Jj]' + WHITESPACE)
+@TokenRule(f'(?:{FLOATNUMBER}|[0-9]+)[Jj]{WHITESPACE}')
 def t_IMAGINARY(t): return t
 
 @TokenRule(FLOATNUMBER + WHITESPACE)
 def t_FLOATNUMBER(t): return t
 
-@TokenRule(r'0[xX][0-9a-fA-F]+[Ll]?' + WHITESPACE)
+@TokenRule(f'0[xX][0-9a-fA-F]+[Ll]?{WHITESPACE}')
 def t_HEXINTEGER(t): return t
 
-@TokenRule(r'0[0-7]+[Ll]?' + WHITESPACE)
+@TokenRule(f'0[0-7]+[Ll]?{WHITESPACE}')
 def t_OCTINTEGER(t): return t
 
-@TokenRule(r'(?:0|[1-9][0-9]*)[Ll]?' + WHITESPACE)
+@TokenRule(f'(?:0|[1-9][0-9]*)[Ll]?{WHITESPACE}')
 def t_DECINTEGER(t): return t
 
 @TokenRule(STRINGPREFIX + r"'''(?:[^\\]|\\.)*'''" + WHITESPACE)
@@ -230,9 +230,9 @@ unimplemented_python_keywords = (
 )
 
 DOT_RE = re.compile(t_DOT)
-FLCELLREFLIKENAME_RE = re.compile(r'^%s$' % CELLREFLIKENAME)
-FLCOLUMNREFLIKENAME_RE = re.compile(r'^%s$' % COLUMNREFLIKENAME)
-FLROWREFLIKENAME_RE = re.compile(r'^%s$' % ROWREFLIKENAME)
+FLCELLREFLIKENAME_RE = re.compile(f'^{CELLREFLIKENAME}$')
+FLCOLUMNREFLIKENAME_RE = re.compile(f'^{COLUMNREFLIKENAME}$')
+FLROWREFLIKENAME_RE = re.compile(f'^{ROWREFLIKENAME}$')
 
 
 

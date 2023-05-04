@@ -18,9 +18,7 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         # * He notes that the sheet has a name of the form 'Sheet #xx'
         #   where xx is the sheet id
         sheet_id = self.browser.current_url.split(r'/')[-2]
-        self.assertEquals(
-            self.get_text('id=id_sheet_name'),
-            'Sheet %s' % (sheet_id,))
+        self.assertEquals(self.get_text('id=id_sheet_name'), f'Sheet {sheet_id}')
 
         # * He mouses over the sheet name and notes that the appearance
         #   changes to indicate that it's editable
@@ -54,8 +52,9 @@ class Test_2550_EdittableSheetName(FunctionalTest):
             lambda: 'sheet name to be updated'
         )
         # and the title to the page becomes "user's sheet_name: Dirigible"
-        self.assertEquals(self.browser.title, "%s's %s: Dirigible" %
-            (self.get_my_username(), 'margarita'))
+        self.assertEquals(
+            self.browser.title, f"{self.get_my_username()}'s margarita: Dirigible"
+        )
 
         # * He refreshes the page
         self.refresh_sheet_page()
@@ -67,8 +66,9 @@ class Test_2550_EdittableSheetName(FunctionalTest):
         )
         # and the title to the page remains "user's sheet_name: Dirigible"
         self.wait_for(
-            lambda: self.browser.title == "%s's %s: Dirigible" % (self.get_my_username(), 'margarita'),
-            lambda: 'page title to update'
+            lambda: self.browser.title
+            == f"{self.get_my_username()}'s margarita: Dirigible",
+            lambda: 'page title to update',
         )
 
 

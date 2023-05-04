@@ -30,7 +30,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         # * He is taken to a web page which has a URL like /user/XXXX/sheet/<num>
         #        where XXXX is his user name
         _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
-        self.assertRegexpMatches(path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
+        self.assertRegexpMatches(path, f'/user/{self.get_my_username()}/sheet/[0-9]+/')
 
         # * The page has a grid.
         print('check grid')
@@ -48,7 +48,7 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         sheet_name = self.get_text('id=id_sheet_name')
         self.assertEquals(
             self.browser.title,
-            "%s's %s: Dirigible" % (self.get_my_username(), sheet_name)
+            f"{self.get_my_username()}'s {sheet_name}: Dirigible",
         )
 
 
@@ -176,7 +176,9 @@ class Test_2528_CreateEditSheet(FunctionalTest):
         # * ... and gets take to a new sheet
         url = urlparse(self.browser.current_url)
         self.assertEquals(url.netloc, urlparse(Url.ROOT).netloc)
-        self.assertRegexpMatches(url.path, '/user/%s/sheet/[0-9]+/' % (self.get_my_username(),))
+        self.assertRegexpMatches(
+            url.path, f'/user/{self.get_my_username()}/sheet/[0-9]+/'
+        )
 
 
     @snapshot_on_error

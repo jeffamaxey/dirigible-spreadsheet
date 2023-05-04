@@ -53,7 +53,7 @@ class Test_2536_ParallelFormulaExecution(FunctionalTest):
         # the recalc to take about 3sec.
         self.assertTrue(
             self.get_last_recalc_time() < 3.2,
-            'calculation took too long - %ss. Parallel broken?' % (self.get_last_recalc_time(),)
+            f'calculation took too long - {self.get_last_recalc_time()}s. Parallel broken?',
         )
 
     @snapshot_on_error
@@ -67,7 +67,7 @@ class Test_2536_ParallelFormulaExecution(FunctionalTest):
         master_sheet_url = self.browser.current_url
 
         # * he enters formulae that use the worksheet in a number of run_worksheet calls
-        run_worksheet_formula = '=run_worksheet("%s")[1, 1].value' % (worker_sheet_url,)
+        run_worksheet_formula = f'=run_worksheet("{worker_sheet_url}")[1, 1].value'
         for row in range(1, 5):
             self.enter_cell_text(1, row, run_worksheet_formula)
 

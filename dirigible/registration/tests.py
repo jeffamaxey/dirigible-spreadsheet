@@ -251,7 +251,7 @@ class RegistrationFormTests(RegistrationTestCase):
                        'googlemail.com', 'hotmail.com', 'hushmail.com',
                        'msn.com', 'mail.ru', 'mailinator.com', 'live.com'):
             invalid_data = base_data.copy()
-            invalid_data['email'] = u"foo@%s" % domain
+            invalid_data['email'] = f"foo@{domain}"
             form = forms.RegistrationFormNoFreeEmail(data=invalid_data)
             self.failIf(form.is_valid())
             self.assertEqual(form.errors['email'], [u"Registration using free email addresses is prohibited. Please supply a different email address."])
@@ -288,7 +288,10 @@ class RegistrationViewTests(RegistrationTestCase):
                                            'password1': 'foo',
                                            'password2': 'foo' })
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['Location'], 'http://testserver%s' % reverse('registration_complete'))
+        self.assertEqual(
+            response['Location'],
+            f"http://testserver{reverse('registration_complete')}",
+        )
         self.assertEqual(RegistrationProfile.objects.count(), 3)
 
     def test_activation_view(self):

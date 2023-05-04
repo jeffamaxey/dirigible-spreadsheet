@@ -186,6 +186,7 @@ class ImportXLSTest(SheetViewTestCase):
             mock_cell.value = 'cell value'
             sheet.cell.return_value = mock_cell
             return sheet
+
         data = [
             ('first_imported_sheet', 2, 3),
             ('2nd imported sheet', 2, 3),
@@ -214,10 +215,10 @@ class ImportXLSTest(SheetViewTestCase):
 
         actual_sheets = Sheet.objects.all()
         actual_sheetnames = [sheet.name for sheet in actual_sheets]
-        self.assertTrue('uploaded file - %s' % (sheets[0].name,) in actual_sheetnames)
-        self.assertTrue('uploaded file - %s' % (sheets[1].name,) in actual_sheetnames)
-        self.assertFalse('uploaded file - %s' % (sheets[2].name,) in actual_sheetnames)
-        self.assertFalse('uploaded file - %s' % (sheets[3].name,) in actual_sheetnames)
+        self.assertTrue(f'uploaded file - {sheets[0].name}' in actual_sheetnames)
+        self.assertTrue(f'uploaded file - {sheets[1].name}' in actual_sheetnames)
+        self.assertFalse(f'uploaded file - {sheets[2].name}' in actual_sheetnames)
+        self.assertFalse(f'uploaded file - {sheets[3].name}' in actual_sheetnames)
 
         self.assertCalledOnce(mock_os.close, sentinel.handle)
         self.assertCalledOnce(mock_os.unlink, sentinel.filename)
@@ -279,9 +280,7 @@ class ImportXLSTest(SheetViewTestCase):
         sheets = [expected_ws1, expected_ws2]
         mock_worksheet_from_excel.side_effect = lambda _: sheets.pop(0)
 
-        self.request.FILES = {}
-        self.request.FILES['file'] = Mock()
-
+        self.request.FILES = {'file': Mock()}
         response = import_xls(self.request, self.user.username)
 
         self.assertEquals(
@@ -339,9 +338,7 @@ class ImportXLSTest(SheetViewTestCase):
         sheets = [expected_ws1]
         mock_worksheet_from_excel.side_effect = lambda _: sheets.pop(0)
 
-        self.request.FILES = {}
-        self.request.FILES['file'] = Mock()
-
+        self.request.FILES = {'file': Mock()}
         response = import_xls(self.request, self.user.username)
 
         self.assertTrue(isinstance(response, HttpResponseRedirect))
@@ -423,8 +420,9 @@ class ImportCSVTest(SheetViewTestCase):
         resulting_worksheet = worksheet_from_json(call_kwargs['contents_json'])
         for location, value in expected:
             self.assertEquals(
-                resulting_worksheet[location].formula, value,
-                'location %s: %s != %s' % (location, resulting_worksheet[location].formula, value)
+                resulting_worksheet[location].formula,
+                value,
+                f'location {location}: {resulting_worksheet[location].formula} != {value}',
             )
 
 
@@ -524,7 +522,7 @@ class ExportCSVTest(SheetViewTestCase):
         mock_sheet = mock_get_object.return_value
         mock_sheet.owner = self.user
         mock_sheet.name = "Algernon"
-        expected_filename = "%s.csv" % (mock_sheet.name,)
+        expected_filename = f"{mock_sheet.name}.csv"
 
         expected_content = "Hello world"
         mock_worksheet_to_csv.return_value = expected_content
@@ -538,7 +536,10 @@ class ExportCSVTest(SheetViewTestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response['Content-Type'], 'text/csv')
-        self.assertEquals(response['Content-Disposition'], 'attachment; filename=%s' % (expected_filename,))
+        self.assertEquals(
+            response['Content-Disposition'],
+            f'attachment; filename={expected_filename}',
+        )
         self.assertEquals(response['Content-Length'], str(len(expected_content)))
 
         self.assertEquals(response.content, expected_content)
@@ -552,7 +553,7 @@ class ExportCSVTest(SheetViewTestCase):
         mock_sheet = mock_get_object.return_value
         mock_sheet.owner = self.user
         mock_sheet.name = "Algernon"
-        expected_filename = "%s.csv" % (mock_sheet.name,)
+        expected_filename = f"{mock_sheet.name}.csv"
 
         expected_content = "Hello world"
         mock_worksheet_to_csv.return_value = expected_content
@@ -567,7 +568,10 @@ class ExportCSVTest(SheetViewTestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response['Content-Type'], 'text/csv')
-        self.assertEquals(response['Content-Disposition'], 'attachment; filename=%s' % (expected_filename,))
+        self.assertEquals(
+            response['Content-Disposition'],
+            f'attachment; filename={expected_filename}',
+        )
         self.assertEquals(response['Content-Length'], str(len(expected_content)))
 
         self.assertEquals(response.content, expected_content)
@@ -933,7 +937,7 @@ class SetSheetUsercodeTest(SheetViewTestCase):
     @patch('sheet.views.update_sheet_with_version_check')
     def test_view_should_set_sheet_usercode_and_updates_version(self, mock_update_sheet_with_version_check):
         expected_usercode = 'mary had a leg of lamb'
-        self.request.POST["usercode"] = str(expected_usercode)
+        self.request.POST["usercode"] = expected_usercode
         mock_update_sheet_with_version_check.return_value = True
 
         response = set_sheet_usercode(self.request, self.user.username, self.sheet.id)
@@ -949,7 +953,7 @@ class SetSheetUsercodeTest(SheetViewTestCase):
     def test_view_set_sheet_usercode_fixes_windows_line_endings(self):
         submitted_usercode = 'mary had a\r\n leg of\r lamb'
         expected_usercode = 'mary had a\n leg of\r lamb'
-        self.request.POST["usercode"] = str(submitted_usercode)
+        self.request.POST["usercode"] = submitted_usercode
 
         set_sheet_usercode(self.request, self.user.username, self.sheet.id)
 
@@ -1488,13 +1492,13 @@ class VersionUpdatesTest(SheetViewTestCase):
 
         import sheet.views
         for view_name in dir(sheet.views):
-            if not re.match("__.*__", view_name):
-                if (view_name not in version_update_view and
-                    view_name not in no_version_update_view and
-                    view_name not in utility_functions and
-                    view_name not in extra_imported_stuff_to_ignore
-                   ):
-                    self.fail("%s not considered for version update" % (view_name,))
+            if not re.match("__.*__", view_name) and (
+                view_name not in version_update_view
+                and view_name not in no_version_update_view
+                and view_name not in utility_functions
+                and view_name not in extra_imported_stuff_to_ignore
+            ):
+                self.fail(f"{view_name} not considered for version update")
 
 
     def test_update_sheet_with_version_check_should_update_increment_version_and_return_true_if_no_change(self):

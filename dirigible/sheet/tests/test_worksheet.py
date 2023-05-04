@@ -552,10 +552,8 @@ class WorksheetTest(unittest.TestCase):
         self, mock_name_to_coords
     ):
         def name_to_coords(name):
-            if name == 'A1':
-                return (2, 3)
-            else:
-                return None
+            return (2, 3) if name == 'A1' else None
+
         mock_name_to_coords.side_effect = name_to_coords
 
         ws = Worksheet()
@@ -655,6 +653,7 @@ class WorksheetTest(unittest.TestCase):
                 for _ in range(num_tries):
                     ws.add_console_text(str(char_num) * num_chars)
             return inner
+
         threads = []
         for i in range(num_threads):
             threads.append(Thread(target=get_console_text_adder(i)))
@@ -667,7 +666,9 @@ class WorksheetTest(unittest.TestCase):
             found_pos = -num_chars
             for _ in range(num_tries):
                 found_pos = ws._console_text.find(str(i) * num_chars, found_pos + num_chars)
-                self.assertNotEqual(found_pos, -1, 'could not find all output for thread %s' % (str(i),))
+                self.assertNotEqual(
+                    found_pos, -1, f'could not find all output for thread {str(i)}'
+                )
 
 
     def test_getting_bounds_on_empty_sheet_should_return_none(self):

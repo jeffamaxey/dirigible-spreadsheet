@@ -64,9 +64,11 @@ def assert_security_classes_exist(test, module_name, excludes=None):
     this module has an associated security test class.
     '''
     test_classes = [
-        name for name, item in sys.modules[module_name].__dict__.iteritems()
-        if isinstance(item, type) and issubclass(item, TEST_CLASSES)
-        and not item in TEST_CLASSES
+        name
+        for name, item in sys.modules[module_name].__dict__.iteritems()
+        if isinstance(item, type)
+        and issubclass(item, TEST_CLASSES)
+        and item not in TEST_CLASSES
     ]
     regular_test_classes = [
         name for name in test_classes
@@ -77,8 +79,8 @@ def assert_security_classes_exist(test, module_name, excludes=None):
     for name in regular_test_classes:
         if name not in excludes:
             test.assertTrue(
-                name[:-4] + 'SecurityTest' in test_classes,
+                f'{name[:-4]}SecurityTest' in test_classes,
                 "class %s doesn't have a security test. "
-                "Use user page security test as template" % (name,)
+                "Use user page security test as template" % (name,),
             )
 

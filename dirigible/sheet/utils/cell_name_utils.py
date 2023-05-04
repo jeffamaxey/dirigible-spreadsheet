@@ -15,9 +15,7 @@ def column_name_to_index(colName):
     for letter in colName.upper():
         result *= 26
         result += ord(letter) - ord("A") + 1
-    if result > MAX_COL:
-        return None
-    return result
+    return None if result > MAX_COL else result
 
 def column_index_to_name(index):
     if index > MAX_COL:
@@ -37,9 +35,7 @@ def _col_row_names_to_coordinates(col, row):
         return None
     colIndex = column_name_to_index(col)
     rowIndex = int(row)
-    if not colIndex or rowIndex > sys.maxint:
-        return None
-    return (colIndex, rowIndex)
+    return None if not colIndex or rowIndex > sys.maxint else (colIndex, rowIndex)
 
 
 def coordinates_to_cell_name(col, row, colAbsolute=False, rowAbsolute=False):
@@ -85,13 +81,12 @@ def cell_name_to_coordinates(cellName):
 
 def cell_ref_as_string_to_coordinates(cell_ref):
     cell_ref = cell_ref.replace('(', '').replace(')', '')
-    if ',' in cell_ref:
-        try:
-            return tuple(map(int, cell_ref.split(',')))
-        except ValueError:
-            return None
-    else:
+    if ',' not in cell_ref:
         return cell_name_to_coordinates(cell_ref)
+    try:
+        return tuple(map(int, cell_ref.split(',')))
+    except ValueError:
+        return None
 
 
 
@@ -102,7 +97,4 @@ def cell_range_as_string_to_coordinates(cell_range_string):
     str_start, str_end = parts
     start = cell_name_to_coordinates(str_start)
     end = cell_name_to_coordinates(str_end)
-    if start is None or end is None:
-        return None
-    else:
-        return start, end
+    return None if start is None or end is None else (start, end)

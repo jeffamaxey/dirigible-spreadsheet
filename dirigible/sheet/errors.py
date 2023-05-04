@@ -17,13 +17,11 @@ class CycleError(Exception):
 
 
     def __repr__(self):
-        return 'CycleError(%s)' % (str(self),)
+        return f'CycleError({str(self)})'
 
 
     def __eq__(self, other):
-        if isinstance(other, CycleError):
-            return self.path == other.path
-        return False
+        return self.path == other.path if isinstance(other, CycleError) else False
 
 
     def __ne__(self, other):
@@ -32,7 +30,7 @@ class CycleError(Exception):
 
 def report_cell_error(worksheet, loc, exc):
     worksheet[loc].value = undefined
-    worksheet[loc].error = "%s: %s" % (exc.__class__.__name__, str(exc))
+    worksheet[loc].error = f"{exc.__class__.__name__}: {str(exc)}"
     worksheet.add_console_text("%s\n    Formula '%s' in %s\n" % (
     worksheet[loc].error, worksheet[loc].formula, coordinates_to_cell_name(*loc)))
 

@@ -64,9 +64,12 @@ class RegistrationForm(forms.Form):
         field.
         
         """
-        if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
-            if self.cleaned_data['password1'] != self.cleaned_data['password2']:
-                raise forms.ValidationError(_(u'You must type the same password each time'))
+        if (
+            'password1' in self.cleaned_data
+            and 'password2' in self.cleaned_data
+            and self.cleaned_data['password1'] != self.cleaned_data['password2']
+        ):
+            raise forms.ValidationError(_(u'You must type the same password each time'))
         return self.cleaned_data
     
     def save(self, profile_callback=None):
@@ -81,11 +84,12 @@ class RegistrationForm(forms.Form):
         supplied.
         
         """
-        new_user = RegistrationProfile.objects.create_inactive_user(username=self.cleaned_data['username'],
-                                                                    password=self.cleaned_data['password1'],
-                                                                    email=self.cleaned_data['email'],
-                                                                    profile_callback=profile_callback)
-        return new_user
+        return RegistrationProfile.objects.create_inactive_user(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password1'],
+            email=self.cleaned_data['email'],
+            profile_callback=profile_callback,
+        )
 
 
 class RegistrationFormTermsOfService(RegistrationForm):

@@ -82,7 +82,7 @@ class UserDashboardTest(django.test.TestCase):
         objects_passed_to_template = mock_render_to_response.call_args[0][1]
         self.assertTrue('sheets' in objects_passed_to_template)
         passed_sheet_ids = [s.id for s in objects_passed_to_template['sheets']]
-        self.assertEquals(set(passed_sheet_ids), set(s.id for s in sheets))
+        self.assertEquals(set(passed_sheet_ids), {s.id for s in sheets})
 
 
 
@@ -216,7 +216,7 @@ class RegistrationViewsTest(ResolverTestCase):
 
         from_sheet = Sheet(owner=from_user)
         from_sheet.save()
-        next_url = '/user/admin/sheet/%s/copy_sheet/' % (from_sheet.id,)
+        next_url = f'/user/admin/sheet/{from_sheet.id}/copy_sheet/'
 
         callback = copy_sheet_for_new_user_callback(next_url)
         callback(to_user)
@@ -254,9 +254,7 @@ class RegistrationViewsTest(ResolverTestCase):
         mock_form.is_valid.return_value = False
 
         mock_request = Mock()
-        mock_request.POST = {}
-        mock_request.POST['next'] = 'next_page'
-
+        mock_request.POST = {'next': 'next_page'}
         mock_callback = Mock()
         mock_copy_sheet_callback.return_value = mock_callback
 

@@ -24,7 +24,7 @@ class Test_2892_CellTooltips(FunctionalTest):
         # he hovered over it
 
         tooltip = self.selenium.get_attribute(
-                self.get_cell_shown_formula_locator(1, 1) + '@title'
+            f'{self.get_cell_shown_formula_locator(1, 1)}@title'
         )
 
         self.assertEquals(tooltip, '=A2')
@@ -43,7 +43,7 @@ class Test_2892_CellTooltips(FunctionalTest):
         # he hovered over it
 
         tooltip = self.selenium.get_attribute(
-                self.get_cell_formatted_value_locator(1, 1) + '@title'
+            f'{self.get_cell_formatted_value_locator(1, 1)}@title'
         )
 
         self.assertEquals(tooltip, 'Maude')

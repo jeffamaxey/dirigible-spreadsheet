@@ -65,10 +65,7 @@ class ParseNode(object):
 
 
     def __repr__(self):
-        if self.children:
-            childrenStr = " children=%r" % (self.children)
-        else:
-            childrenStr = ""
+        childrenStr = " children=%r" % (self.children) if self.children else ""
         return "<%s type=\"%s\"%s>" % (self.__class__.__name__, self.type, childrenStr)
 
     __str__ = __repr__
@@ -84,11 +81,10 @@ class ParseNode(object):
             return False
         if len(self.children) != len(other.children):
             return False
-        for selfChild, otherChild in zip(self.children, other.children):
-            if selfChild != otherChild:
-                return False
-
-        return True
+        return all(
+            selfChild == otherChild
+            for selfChild, otherChild in zip(self.children, other.children)
+        )
 
 
     def __ne__(self, other):
@@ -117,7 +113,6 @@ class ParseNode(object):
     @classmethod
     def construct_node(cls, nodeType, children):
         if nodeType in cls.classRegistry:
-            retVal = cls.classRegistry[nodeType](children)
-            return retVal
+            return cls.classRegistry[nodeType](children)
         else:
             return cls(nodeType, children)

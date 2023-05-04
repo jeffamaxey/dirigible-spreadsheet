@@ -24,13 +24,10 @@ class Test_2814_PublicWorksheets(FunctionalTest):
 
 
     def waitForButtonToIndicateSheetIsPublic(self, public):
-        if public:
-            expected_text = 'Sheet is public'
-        else:
-            expected_text = 'Sheet is private'
-
+        expected_text = 'Sheet is public' if public else 'Sheet is private'
         def get_button_title():
             return self.selenium.get_attribute('css=#id_security_button@title')
+
         self.wait_for(
             lambda : expected_text in get_button_title(),
             lambda : "%r to be in %r" % (expected_text, get_button_title())
@@ -38,6 +35,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
 
         def get_button_alt_text():
             return self.selenium.get_attribute('css=#id_security_button@alt')
+
         self.wait_for(
             lambda : expected_text in get_button_alt_text(),
             lambda : "%r to be in %r" % (expected_text, get_button_alt_text())
@@ -126,8 +124,10 @@ class Test_2814_PublicWorksheets(FunctionalTest):
 
         # * she tries to edit the cell again, using the formula bar, but cannot
         self.assertEquals(
-            self.selenium.get_attribute(self.get_formula_bar_locator() + '@readonly'),
-            'true'
+            self.selenium.get_attribute(
+                f'{self.get_formula_bar_locator()}@readonly'
+            ),
+            'true',
         )
 
         # * She tries to edit some usercode, but can't
@@ -278,8 +278,8 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         # Hugh goes through the whole registration rigmarole,
         self.selenium.click('id=id_login_signup_link')
         self.selenium.wait_for_page_to_load(PAGE_LOAD_TIMEOUT)
-        username = self.get_my_username() + "_x"
-        self.email_address = 'harold.testuser-%s@resolversystems.com' % (username,)
+        username = f"{self.get_my_username()}_x"
+        self.email_address = f'harold.testuser-{username}@resolversystems.com'
         password = "p4ssw0rd"
         self.selenium.type('id=id_username', username)
         self.selenium.type('id=id_email', self.email_address)
@@ -294,7 +294,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
         )
         match = confirm_url_re.search(message)
         self.assertTrue(match)
-        confirmation_url = match.group(1).replace('projectdirigible.com', SERVER_IP)
+        confirmation_url = match[1].replace('projectdirigible.com', SERVER_IP)
 
         # * Hugh then logs in
         self.go_to_url(confirmation_url)
@@ -324,7 +324,7 @@ class Test_2814_PublicWorksheets(FunctionalTest):
 
         # * He is having some trouble working with a complicated task
         #   so he asks an admin for help. Giving him the sheet url
-        sheet_url = '/user/%s/sheet/%s' % (self.get_my_username(), sheet_id)
+        sheet_url = f'/user/{self.get_my_username()}/sheet/{sheet_id}'
         self.logout()
 
         # * The admin logs in and visits the sheet

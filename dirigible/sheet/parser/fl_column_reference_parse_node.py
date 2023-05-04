@@ -37,11 +37,10 @@ class FLColumnReferenceParseNode(FLReferenceParseNode):
     def offset(self, count, _, moveAbsolute=False):
         if not moveAbsolute and self.isAbsolute:
             return
-        newName = column_index_to_name(self.colIndex + count)
-        if newName:
+        if newName := column_index_to_name(self.colIndex + count):
             self.plainColumnName = newName
         else:
-            self.localReference = '#Invalid!' + self.whitespace
+            self.localReference = f'#Invalid!{self.whitespace}'
 
     def __getLocalReference(self):
         return self.children[-1]

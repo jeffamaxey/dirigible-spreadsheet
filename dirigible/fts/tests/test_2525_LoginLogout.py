@@ -31,8 +31,7 @@ class Test_2525_LoginLogout(FunctionalTest):
 
         # He is taken to a page entitled "XXXX's Dashboard: Dirigible" at the site's root URL.
         self.assertEquals(
-            self.browser.title,
-            "{}'s Dashboard: Dirigible".format(self.get_my_username())
+            self.browser.title, f"{self.get_my_username()}'s Dashboard: Dirigible"
         )
         _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertEquals(path, '/')
@@ -156,10 +155,7 @@ class Test_2525_LoginLogout(FunctionalTest):
         self.click_link('id_login')
 
         # He is taken to a page entitled "XXXX's Dashboard: Dirigible" at the site's root URL.
-        self.assertEquals(
-            self.browser.title,
-            "{}'s Dashboard: Dirigible".format(username)
-        )
+        self.assertEquals(self.browser.title, f"{username}'s Dashboard: Dirigible")
         _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertEquals(path, '/')
 
@@ -195,8 +191,8 @@ class Test_2525_LoginLogout(FunctionalTest):
     def test_legacy_dashboard_link_takes_you_to_root_url(self):
         harriet = self.get_my_usernames()[1]
         harold = self.get_my_username()
-        harolds_dashboard_url = '/user/%s/' % (harold,)
-        harriets_dashboard_url = '/user/%s/' % (harriet,)
+        harolds_dashboard_url = f'/user/{harold}/'
+        harriets_dashboard_url = f'/user/{harriet}/'
 
         # Before logging in, Harold tries to access his own dashboard using the
         # old-style URL.

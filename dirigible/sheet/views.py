@@ -37,10 +37,10 @@ from user.models import AnonymousUser
 def fetch_users_sheet(view):
     def _fetch_users_sheet_if_permitted(request, username, sheet_id, *args, **kwargs):
         sheet = get_object_or_404(Sheet, pk=sheet_id, owner__username=username)
-        if sheet.owner != request.user:
-            if not request.user.is_staff:
-                return HttpResponseForbidden(render_to_string("403.html"))
+        if sheet.owner != request.user and not request.user.is_staff:
+            return HttpResponseForbidden(render_to_string("403.html"))
         return view(request, sheet, *args, **kwargs)
+
     return _fetch_users_sheet_if_permitted
 
 
@@ -51,7 +51,7 @@ def fetch_users_or_public_sheet(view):
         if not sheet.is_public:
             if isinstance(request.user, AnonymousUser):
                 sheet_url = reverse('sheet_page', args=(username, sheet_id))
-                return HttpResponseRedirect('/login?next=/%s' % (sheet_url,))
+                return HttpResponseRedirect(f'/login?next=/{sheet_url}')
             elif sheet.owner != request.user and not request.user.is_staff:
                 return HttpResponseForbidden(render_to_string("403.html"))
 
@@ -94,10 +94,7 @@ def import_xls(request, username):
         wb = xlrd.open_workbook(filename)
         for xl_sheet in wb.sheets():
             if xl_sheet.nrows > 0 and xl_sheet.ncols > 0:
-                name = '%s - %s' % (
-                    splitext(request.FILES['file'].name)[0],
-                    xl_sheet.name
-                )
+                name = f"{splitext(request.FILES['file'].name)[0]} - {xl_sheet.name}"
                 sheet = Sheet(owner=request.user, name=name)
                 sheet.jsonify_worksheet(worksheet_from_excel(xl_sheet))
                 sheet.save()
@@ -122,11 +119,7 @@ def import_xls(request, username):
 
 @fetch_users_or_public_sheet
 def export_csv(request, sheet, csv_format):
-    if csv_format == 'unicode':
-        encoding = 'utf-8'
-    else:
-        encoding = 'windows-1252'
-
+    encoding = 'utf-8' if csv_format == 'unicode' else 'windows-1252'
     try:
         content = worksheet_to_csv(
             sheet.unjsonify_worksheet(),
@@ -141,7 +134,7 @@ def export_csv(request, sheet, csv_format):
         )
 
     response = HttpResponse(content, content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (sheet.name,)
+    response['Content-Disposition'] = f'attachment; filename={sheet.name}.csv'
     response['Content-Length'] = len(content)
     return response
 
@@ -346,12 +339,13 @@ def clipboard(request, sheet, action):
 
     elif action == 'cut':
         clipboard.cut(sheet, (start_col, start_row), (end_col, end_row))
-        if update_sheet_with_version_check(sheet, contents_json=sheet.contents_json):
-            clipboard.save()
-            return HttpResponse('OK')
-        else:
+        if not update_sheet_with_version_check(
+            sheet, contents_json=sheet.contents_json
+        ):
             return HttpResponse('{ "message": "Cut aborted: sheet changed" }')
 
+        clipboard.save()
+        return HttpResponse('OK')
     elif action == 'paste':
         if clipboard_blank:
             return HttpResponse('{ "message": "Clipboard blank" }')
@@ -359,8 +353,7 @@ def clipboard(request, sheet, action):
         clipboard.paste_to(sheet, (start_col, start_row), (end_col, end_row))
         if update_sheet_with_version_check(sheet, contents_json=sheet.contents_json):
             clipboard.save()
-            result = HttpResponse('OK')
+            return HttpResponse('OK')
         else:
-            result = HttpResponse('{ "message": "Paste aborted: sheet changed" }')
-        return result
+            return HttpResponse('{ "message": "Paste aborted: sheet changed" }')
 

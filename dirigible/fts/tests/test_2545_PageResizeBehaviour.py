@@ -74,7 +74,9 @@ class Test_2545_PageResizeBehaviour(FunctionalTest):
         original_distance_to_top = grid_bounds.top
 
         # He resizes the window.
-        self.selenium.get_eval("window.resizeTo(%s, %s)" % (browser_page_width - 10, browser_page_height - 10))
+        self.selenium.get_eval(
+            f"window.resizeTo({browser_page_width - 10}, {browser_page_height - 10})"
+        )
 
         # He notes that the grid is still the same distances from the top and the bottom of the
         # window.
@@ -82,14 +84,16 @@ class Test_2545_PageResizeBehaviour(FunctionalTest):
             new_grid_bounds = self.get_element_bounds("id=id_grid")
             browser_page_height = int(self.selenium.get_eval("window.document.body.clientHeight"))
             return browser_page_height - new_grid_bounds.bottom
+
         self.wait_for(
             lambda: get_distance_to_bottom() == original_distance_to_bottom,
-            lambda: "Distance to bottom to become %s (was %s)" % (original_distance_to_bottom, get_distance_to_bottom())
+            lambda: f"Distance to bottom to become {original_distance_to_bottom} (was {get_distance_to_bottom()})",
         )
 
         def get_distance_to_top():
             return self.get_element_bounds("id=id_grid").top
+
         self.wait_for(
             lambda: get_distance_to_top() == original_distance_to_top,
-            lambda: "Distance to top to become %s (was %s)" % (original_distance_to_top, get_distance_to_top())
+            lambda: f"Distance to top to become {original_distance_to_top} (was {get_distance_to_top()})",
         )

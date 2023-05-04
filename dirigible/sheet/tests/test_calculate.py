@@ -119,7 +119,7 @@ class TestRecalculateCell(ResolverTestCase):
         parent = Mock()
         parent_loc = (2, 3)
         node = Mock()
-        node.parents = set([(parent_loc)])
+        node.parents = {parent_loc}
         graph = { location: node, parent_loc: parent }
         context = { 'worksheet': { location: cell, } }
 
@@ -263,11 +263,11 @@ class TestEvaluateFormulaeInContext(ResolverTestCase):
         mock_queue_class.side_effect = lambda: Mock()
         mock_create_cell_recalculator.return_value = sentinel.create_cell_recalculator
         graph = {
-            (1, 1): set([(1, 2), (1, 3)]),
-            (1, 3): set([(2, 2), (2, 3)]),
+            (1, 1): {(1, 2), (1, 3)},
+            (1, 3): {(2, 2), (2, 3)},
             (2, 2): set(),
             (1, 2): set(),
-            (2, 3): set()
+            (2, 3): set(),
         }
         leaves = [(2, 2), (1, 2), (2, 3)]
         mock_build_dependency_graph.return_value = ( graph, leaves )
@@ -690,7 +690,7 @@ class TestRunWorksheet(ResolverTestCase):
     def test_run_worksheet_no_overrides(self, mock_api_json_to_worksheet, mock_urllib2):
         mock_api_json_to_worksheet.return_value = Worksheet()
         worksheet_url = 'ws_url/'
-        target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+        target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
         result = run_worksheet(worksheet_url, None, sentinel.private_key)
 
         self.assertCalledOnce(mock_urllib2.build_opener)
@@ -711,7 +711,7 @@ class TestRunWorksheet(ResolverTestCase):
         str_overrides = {'a1': '55', 'dirigible_l337_private_key': sentinel.private_key}
         mock_api_json_to_worksheet.return_value = Worksheet()
         worksheet_url = 'ws_url/'
-        target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+        target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
         result = run_worksheet(worksheet_url, overrides, sentinel.private_key)
 
         self.assertCalledOnce(mock_urllib2.build_opener)
@@ -742,7 +742,7 @@ class TestRunWorksheet(ResolverTestCase):
     @patch('sheet.calculate.api_json_to_worksheet')
     def test_run_worksheet_passes_private_key_in_params(self, mock_api_json_to_worksheet, mock_urllib2):
         worksheet_url = 'ws_url/'
-        target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+        target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
         mock_api_json_to_worksheet.return_value = Worksheet()
 
         mock_opener = mock_urllib2.build_opener.return_value
@@ -841,7 +841,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         worksheet[2, 5].formula = 'blurgle'
 
         calculate(worksheet, SANITY_CHECK_USERCODE % ('', ''), sentinel.private_key)
-        self.assertEquals(set(worksheet.keys()), set([(1, 2), (3, 4), (2, 5)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 2), (3, 4), (2, 5)})
         self.assertEquals(worksheet[1, 2].formula, '3')
         self.assertEquals(worksheet[3, 4].formula, '4+5')
         self.assertEquals(worksheet[2, 5].formula, 'blurgle')
@@ -858,7 +858,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
 
         calculate(worksheet, SANITY_CHECK_USERCODE % ('', ''), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 2), (3, 4), (4, 4)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 2), (3, 4), (4, 4)})
         self.assertEquals(worksheet[1, 2].value, 3)
         self.assertEquals(worksheet[3, 4].value, 9)
         self.assertEquals(worksheet[4, 4].value, 0.1)
@@ -876,7 +876,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
 
         calculate(worksheet, SANITY_CHECK_USERCODE % ('', ''), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 1), (1, 2), (1, 3), (1, 4)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 1), (1, 2), (1, 3), (1, 4)})
         self.assertEquals(worksheet[1, 1].value, 1)
         self.assertEquals(worksheet[1, 2].value, 2)
         self.assertEquals(worksheet[1, 3].value, 3)
@@ -895,7 +895,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
 
         calculate(worksheet, SANITY_CHECK_USERCODE % ('', ''), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 1), (1, 2), (1, 3)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 1), (1, 2), (1, 3)})
         self.assertEquals(worksheet[1, 1].value, 1)
         self.assertEquals(worksheet[1, 2].value, 2)
         self.assertEquals(worksheet[1, 3].value, 3)
@@ -909,7 +909,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         preformula_usercode = "worksheet[1, 2].value = worksheet[1, 1].value + 1"
         calculate(worksheet, SANITY_CHECK_USERCODE % (preformula_usercode, ''), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 1), (1, 2), (1, 3)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 1), (1, 2), (1, 3)})
         self.assertEquals(worksheet[1, 1].value, 3)
         self.assertEquals(worksheet[1, 2].value, 4)
         self.assertEquals(worksheet[1, 3].value, 5)
@@ -925,7 +925,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
 
         calculate(worksheet, SANITY_CHECK_USERCODE % ('', postformula_usercode), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 1), (1, 2)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 1), (1, 2)})
         self.assertEquals(worksheet[1, 1].value, 1)
         self.assertEquals(worksheet[1, 2].value, 2)
         self.assertEquals(worksheet[1, 1].formula, '=1')
@@ -944,7 +944,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
 
         calculate(worksheet, SANITY_CHECK_USERCODE % (preformula_usercode, ''), sentinel.private_key)
 
-        self.assertEquals(set(worksheet.keys()), set([(1, 1), (1, 2)]))
+        self.assertEquals(set(worksheet.keys()), {(1, 1), (1, 2)})
         self.assertEquals(worksheet[1, 1].value, 1)
         self.assertEquals(worksheet[1, 2].value, 4)
         self.assertEquals(worksheet[1, 1].formula, '1')
@@ -985,7 +985,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         worksheet_url = 'ws_url/'
         result = run_worksheet(worksheet_url, None, sentinel.private_key)
 
-        target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+        target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
         self.assertCalledOnce(mock_opener.open, target_url, data=urlencode({'dirigible_l337_private_key': sentinel.private_key}))
         self.assertEquals(type(result), Worksheet)
         self.assertEquals(result, expected_sheet)
@@ -1037,7 +1037,7 @@ class TestCalculateSemiFunctional(ResolverTestCase):
         worksheet_url = 'ws_url/'
         result = run_worksheet(worksheet_url, overrides, sentinel.private_key)
 
-        target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+        target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
         self.assertCalledOnce(mock_opener.open, target_url, data=urlencode(overrides))
         self.assertEquals(type(result), Worksheet)
         expected_sheet = Worksheet()

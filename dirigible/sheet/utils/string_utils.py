@@ -4,14 +4,12 @@
 
 def get_rstripped_part(string):
     strippedString = string.rstrip()
-    whitespace = string[len(strippedString):]
-    return whitespace
+    return string[len(strippedString):]
 
 
 def get_lstripped_part(string):
     strippedString = string.lstrip()
-    whitespace = string[:-len(strippedString)]
-    return whitespace
+    return string[:-len(strippedString)]
 
 
 def double_quote_repr_string(inString):

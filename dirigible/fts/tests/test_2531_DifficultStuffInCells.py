@@ -76,10 +76,10 @@ class Test_2531_DifficultStuffInCells(FunctionalTest):
         self.open_cell_for_editing(1, self.row)
         self.wait_for_cell_editor_content(typed)
 
-        self.enter_cell_text(2, self.row, '="%s"' % (typed, ))
-        self.wait_for_cell_value(2, self.row, '%s' % (typed,))
+        self.enter_cell_text(2, self.row, f'="{typed}"')
+        self.wait_for_cell_value(2, self.row, f'{typed}')
         self.open_cell_for_editing(2, self.row)
-        self.wait_for_cell_editor_content('="%s"' % (typed, ))
+        self.wait_for_cell_editor_content(f'="{typed}"')
 
 
     def test_html_chars_escaped(self):

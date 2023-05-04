@@ -49,7 +49,7 @@ class Cell(object):
 
 
     def _set_python_formula(self, value):
-        if type(value) == str or type(value) == unicode:
+        if type(value) in [str, unicode]:
             self._python_formula = value
         else:
             raise TypeError('cell python_formula must be str or unicode')
@@ -79,7 +79,7 @@ class Cell(object):
     def _set_formatted_value(self, value):
         if value is None:
             self._formatted_value = u''
-        elif type(value) == str or type(value) == unicode:
+        elif type(value) in [str, unicode]:
             self._formatted_value = value
         else:
             raise TypeError('cell formatted_value must be str or unicode')
@@ -100,11 +100,9 @@ class Cell(object):
 
 
     def __repr__(self):
-        error = ""
-        if self.error:
-            error = " error=%r" % (self.error,)
+        error = " error=%r" % (self.error,) if self.error else ""
         return '<Cell formula=%s value=%r formatted_value=%r%s>' % \
-            (self.formula, self._value, self.formatted_value, error)
+                (self.formula, self._value, self.formatted_value, error)
 
 
     def __eq__(self, other):

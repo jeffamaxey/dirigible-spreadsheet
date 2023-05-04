@@ -85,7 +85,7 @@ class CalculateAndGetJsonForApiViewTest(
     def test_ignores_old_private_key_things(self):
         otp = OneTimePad(user=self.user)
         otp.save()
-        otp.creation_time = datetime.today() - timedelta(36000)
+        otp.creation_time = datetime.now() - timedelta(36000)
         otp.save()
         guid = otp.guid
         self.request.method = 'POST'

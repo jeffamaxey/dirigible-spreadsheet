@@ -33,16 +33,14 @@ class Bounds(tuple):
 
 def dump_cell_to_json_stream(stream, col, row, cell):
     stream.write('"%s,%s": { ' % (col, row))
-    stream.write('"formula": %s, ' % (json.dumps(cell.formula),))
-    stream.write('"formatted_value": %s ' % (json.dumps(cell.formatted_value),))
+    stream.write(f'"formula": {json.dumps(cell.formula)}, ')
+    stream.write(f'"formatted_value": {json.dumps(cell.formatted_value)} ')
     if cell.python_formula:
-        stream.write(', "python_formula": %s ' % (json.dumps(cell.python_formula),))
+        stream.write(f', "python_formula": {json.dumps(cell.python_formula)} ')
     if cell.dependencies:
-        stream.write(', "dependencies": %s ' % (
-            json.dumps(map(list, cell.dependencies)),)
-        )
+        stream.write(f', "dependencies": {json.dumps(map(list, cell.dependencies))} ')
     if cell.error:
-        stream.write(', "error": %s ' % (json.dumps(cell.error),))
+        stream.write(f', "error": {json.dumps(cell.error)} ')
     try:
         stream.write(', "value": %s ' % (json.dumps(cell.value, allow_nan=False),))
     except (TypeError, ValueError):
@@ -55,8 +53,8 @@ def worksheet_to_json(worksheet):
     stream = StringIO()
     stream.write("{ ")
 
-    stream.write('"_console_text": %s, ' % (json.dumps(worksheet._console_text),))
-    stream.write('"_usercode_error": %s ' % (json.dumps(worksheet._usercode_error),))
+    stream.write(f'"_console_text": {json.dumps(worksheet._console_text)}, ')
+    stream.write(f'"_usercode_error": {json.dumps(worksheet._usercode_error)} ')
 
     for (col, row), cell in worksheet.iteritems():
         stream.write(',')
@@ -102,11 +100,8 @@ def worksheet_to_csv(worksheet, encoding):
             for col in range(1, right + 1):
                 value = worksheet[col, row].value
                 encoded_value = ''
-                if not value is undefined:
-                    if hasattr(value, 'encode'):
-                        encoded_value = value.encode(encoding)
-                    else:
-                        encoded_value = value
+                if value is not undefined:
+                    encoded_value = value.encode(encoding) if hasattr(value, 'encode') else value
                 row_list.append(encoded_value)
             writer.writerow(row_list)
 
@@ -121,7 +116,7 @@ def worksheet_from_excel(excel_sheet):
         for row in range(excel_sheet.nrows):
             cell = excel_sheet.cell(row, col)
             if cell.ctype == XL_CELL_ERROR:
-                formula = '=%s' % (error_text_from_code[cell.value], )
+                formula = f'={error_text_from_code[cell.value]}'
             elif cell.ctype == XL_CELL_DATE:
                 formula = '=DateTime(%s, %s, %s, %s, %s, %s)' % xldate_as_tuple(
                     cell.value, excel_sheet.book.datemode)
@@ -141,11 +136,10 @@ class Worksheet(dict):
 
 
     def __getitem__(self, key):
-        location = self.to_location(key)
-        if not location:
+        if location := self.to_location(key):
+            return self.setdefault(location, Cell())
+        else:
             raise InvalidKeyError("%r is not a valid cell location" % (key,))
-
-        return self.setdefault(location, Cell())
 
 
     def __setitem__(self, key, item):
@@ -160,26 +154,21 @@ class Worksheet(dict):
 
 
     def __getattr__(self, name):
-        location = self.to_location(name)
-        if not location:
+        if location := self.to_location(name):
+            return self.__getitem__(name)
+        else:
             raise AttributeError("'Worksheet' object has no attribute %r" % (name,))
-
-        return self.__getitem__(name)
 
 
     def __setattr__(self, name, value):
-        location = cell_name_to_coordinates(name)
-        if location:
+        if location := cell_name_to_coordinates(name):
             self.__setitem__(location, value)
         else:
             super(Worksheet, self).__setattr__(name, value)
 
 
     def __repr__(self):
-        if self.name:
-            return '<Worksheet %s>' % (self.name,)
-        else:
-            return '<Worksheet>'
+        return f'<Worksheet {self.name}>' if self.name else '<Worksheet>'
 
 
     def __eq__(self, other):
@@ -209,17 +198,18 @@ class Worksheet(dict):
 
     def add_console_text(self, error_text, log_type='error'):
         self._console_lock.acquire()
-        self._console_text += '<span class="console_%s_text">%s</span>' \
-                        % (log_type, escape(error_text))
+        self._console_text += (
+            f'<span class="console_{log_type}_text">{escape(error_text)}</span>'
+        )
         self._console_lock.release()
 
 
     def set_cell_formula(self, col, row, formula):
-        if not formula:
-            if (col, row) in self:
-                del self[col, row]
-        else:
+        if formula:
             self[col, row].formula = formula
+
+        elif (col, row) in self:
+            del self[col, row]
 
 
     def clear_values(self):
@@ -240,7 +230,7 @@ class Worksheet(dict):
         if isinstance(start_or_string_cellrange, basestring) and end is None:
             start_and_end = cell_range_as_string_to_coordinates(start_or_string_cellrange)
             if start_and_end is None:
-                raise ValueError("Invalid cell range '%s'" % (start_or_string_cellrange, ))
+                raise ValueError(f"Invalid cell range '{start_or_string_cellrange}'")
             return CellRange(self, *start_and_end)
 
         def convert_if_needed(cell_ref):
@@ -248,14 +238,17 @@ class Worksheet(dict):
                 return cell_name_to_coordinates(cell_ref)
             else:
                 return cell_ref
+
         start_tuple = convert_if_needed(start_or_string_cellrange)
         end_tuple = convert_if_needed(end)
         if start_tuple is None:
             if end_tuple is None:
-                raise ValueError('Neither %s nor %s are valid cell locations' % (start_or_string_cellrange, end))
-            raise ValueError('%s is not a valid cell location' % (start_or_string_cellrange, ))
+                raise ValueError(
+                    f'Neither {start_or_string_cellrange} nor {end} are valid cell locations'
+                )
+            raise ValueError(f'{start_or_string_cellrange} is not a valid cell location')
         if end_tuple is None:
-            raise ValueError('%s is not a valid cell location' % (end, ))
+            raise ValueError(f'{end} is not a valid cell location')
         return CellRange(self, start_tuple, end_tuple)
 
 

@@ -44,17 +44,12 @@ class Test_2534_JsonWorksheets_v0_1(FunctionalTest):
         sheet_content = json.load(urlopen(Url.api_url(self.get_my_username(), sheet_id), data=urlencode({'api_key': self.get_my_username()})))
 
         expected = {
-            'name' : 'Sheet %s' % (sheet_id,),
-            '1': {
-                '1': 5,
-                '2': 'abc'
-                },
+            'name': f'Sheet {sheet_id}',
+            '1': {'1': 5, '2': 'abc'},
             '2': {
                 '1': 6,
-                },
-            '3': {
-                '1': 11
             },
+            '3': {'1': 11},
         }
         self.assertEquals(sheet_content, expected)
 

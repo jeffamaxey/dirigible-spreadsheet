@@ -37,7 +37,7 @@ class FLRowReferenceParseNode(FLReferenceParseNode):
         if newIndex > 0:
             self.plainRowName = str(newIndex)
         else:
-            self.localReference = '#Invalid!' + self.whitespace
+            self.localReference = f'#Invalid!{self.whitespace}'
 
 
     def __getLocalReference(self):

@@ -76,9 +76,11 @@ class Test_2787_SignUp(FunctionalTest):
 
         # He tries again, this time using his friend's username,
         # but entering sensible details for everything else.
-        username = self.get_my_username() + "_x"
+        username = f"{self.get_my_username()}_x"
         duplicate_username = self.get_my_username()
-        self.email_address = 'harold.testuser-%s@resolversystems.com' % (self.get_my_username(),)
+        self.email_address = (
+            f'harold.testuser-{self.get_my_username()}@resolversystems.com'
+        )
         password = 'p4ssw0rd'
         self.selenium.type(
             'id=id_username',
@@ -197,7 +199,7 @@ class Test_2787_SignUp(FunctionalTest):
             r'<(http://projectdirigible\.com/signup/activate/[^>]+)>')
         match = confirm_url_re.search(message)
         self.assertTrue(match)
-        confirmation_url = match.group(1).replace('projectdirigible.com', SERVER_IP)
+        confirmation_url = match[1].replace('projectdirigible.com', SERVER_IP)
 
         # He decides to type the confirmation link manually into his browser and,
         # inevitably, gets it completely wrong
@@ -220,7 +222,7 @@ class Test_2787_SignUp(FunctionalTest):
         self.login(username, password, already_on_login_page=True)
 
         # He is taken to his dashboard
-        self.assertEquals(self.browser.title, "%s's Dashboard: Dirigible" % (username,))
+        self.assertEquals(self.browser.title, f"{username}'s Dashboard: Dirigible")
         _, __, path, ___, ____, _____ = urlparse(self.browser.current_url)
         self.assertEquals(path, '/')
 
@@ -243,7 +245,9 @@ class Test_2787_SignUp(FunctionalTest):
         # He notices a link to the tutorial inside the dialog
         tutorial_link_inside_dialog_locator = 'css=#id_tutorial_promo_dialog a#id_tutorial_link'
         self.wait_for_element_to_appear(tutorial_link_inside_dialog_locator)
-        tutorial_link_url = self.selenium.get_attribute('%s@href' % (tutorial_link_inside_dialog_locator))
+        tutorial_link_url = self.selenium.get_attribute(
+            f'{tutorial_link_inside_dialog_locator}@href'
+        )
 
         # He clicks the OK button to dismiss the dialog
         self.selenium.click('id=id_tutorial_promo_dialog_close')

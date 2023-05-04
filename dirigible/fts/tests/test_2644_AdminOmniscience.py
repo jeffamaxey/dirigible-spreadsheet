@@ -40,13 +40,14 @@ class Test_2644_AdminOmniscience(FunctionalTest):
         # correct direct URL, with *her* username and the correct sheet ID.
         # He gets redirected to the login page
         self.assert_sends_to_login_page(harriets_sheet_url)
-        self.assert_sends_to_login_page('%scalculate/' % (harriets_sheet_url,))
+        self.assert_sends_to_login_page(f'{harriets_sheet_url}calculate/')
+        self.assert_sends_to_login_page(f'{harriets_sheet_url}set_cell_formula/')
         self.assert_sends_to_login_page(
-            '%sset_cell_formula/' % (harriets_sheet_url,))
+            f'{harriets_sheet_url}get_json_grid_data_for_ui/'
+        )
         self.assert_sends_to_login_page(
-            '%sget_json_grid_data_for_ui/' % (harriets_sheet_url,))
-        self.assert_sends_to_login_page(
-            '%sget_json_meta_data_for_ui/' % (harriets_sheet_url,))
+            f'{harriets_sheet_url}get_json_meta_data_for_ui/'
+        )
 
         # After logging in, Harold tries to access the same sheet
         # using the correct direct URL, with *her* username and the
@@ -54,11 +55,8 @@ class Test_2644_AdminOmniscience(FunctionalTest):
         # He gets a 403 (Access denied) error
         self.login(username=harold)
         self.assert_HTTP_error(harriets_sheet_url, 403)
-        self.assert_HTTP_error('%scalculate/' % (harriets_sheet_url,), 403)
-        self.assert_HTTP_error(
-            '%sget_json_grid_data_for_ui/' % (harriets_sheet_url,), 403)
-        self.assert_HTTP_error(
-            '%sget_json_meta_data_for_ui/' % (harriets_sheet_url,), 403)
-        self.assert_HTTP_error(
-            '%sset_cell_formula/' % (harriets_sheet_url,), 403)
+        self.assert_HTTP_error(f'{harriets_sheet_url}calculate/', 403)
+        self.assert_HTTP_error(f'{harriets_sheet_url}get_json_grid_data_for_ui/', 403)
+        self.assert_HTTP_error(f'{harriets_sheet_url}get_json_meta_data_for_ui/', 403)
+        self.assert_HTTP_error(f'{harriets_sheet_url}set_cell_formula/', 403)
 

@@ -15,11 +15,7 @@ class CellRange(object):
 
 
     def __repr__(self):
-        return '<CellRange %s to %s in %s>' % (
-            coordinates_to_cell_name(self.left, self.top),
-            coordinates_to_cell_name(self.right, self.bottom),
-            str(self.worksheet)
-        )
+        return f'<CellRange {coordinates_to_cell_name(self.left, self.top)} to {coordinates_to_cell_name(self.right, self.bottom)} in {str(self.worksheet)}>'
 
 
     def __eq__(self, other):
@@ -72,9 +68,9 @@ class CellRange(object):
         num_rows = self.bottom - self.top + 1
 
         if abs(location[0]) > num_cols:
-            raise IndexError('Cell range only has %s columns' % (num_cols, ))
+            raise IndexError(f'Cell range only has {num_cols} columns')
         elif abs(location[1]) > num_rows:
-            raise IndexError('Cell range only has %s rows' % (num_rows, ))
+            raise IndexError(f'Cell range only has {num_rows} rows')
         else:
             return location[0] + self.left - 1, location[1] + self.top - 1
 

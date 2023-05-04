@@ -220,7 +220,7 @@ class RegistrationProfile(models.Model):
         verbose_name_plural = _('registration profiles')
     
     def __unicode__(self):
-        return u"Registration information for %s" % self.user
+        return f"Registration information for {self.user}"
     
     def activation_key_expired(self):
         """

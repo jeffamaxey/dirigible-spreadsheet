@@ -57,7 +57,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.wait_for_element_visibility('id=id_feedback_dialog_cancel_button', True)
 
         # * He enters some text into the message field
-        MESSAGE = 'Dear Sirs, your product is teh awesomez!!! love ' + self.get_my_username()
+        MESSAGE = f'Dear Sirs, your product is teh awesomez!!! love {self.get_my_username()}'
         self.selenium.type('id=id_feedback_dialog_text', MESSAGE)
 
         # * He decides he wants us to be able to thank him for his kind words, so he moves to the
@@ -111,7 +111,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.assertEquals(subject, '[Django] User feedback from Dirigible')
         self.assertTrue(MESSAGE in body)
         self.assertTrue(SUBMITTED_EMAIL_ADDRESS in body)
-        self.assertTrue("Page: %s" % (self.browser.current_url,) in body)
+        self.assertTrue(f"Page: {self.browser.current_url}" in body)
 
 
     def test_feedback_dialog_from_logged_in_dashboard(self):
@@ -148,7 +148,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.wait_for_element_visibility('id=id_feedback_dialog_cancel_button', True)
 
         # * He enters some text into the message field
-        MESSAGE = 'Dear Sirs, your product is teh awesomez!!! love ' + self.get_my_username()
+        MESSAGE = f'Dear Sirs, your product is teh awesomez!!! love {self.get_my_username()}'
         self.selenium.type('id=id_feedback_dialog_text', MESSAGE)
 
         # * Hits cancel and the form goes away wthout doing anything
@@ -181,8 +181,8 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.assertEquals(to, 'harold.testuser-admin@projectdirigible.com')
         self.assertEquals(subject, '[Django] User feedback from Dirigible')
         self.assertTrue(MESSAGE in body)
-        self.assertTrue("Username: %s" % (self.get_my_username(),) in body)
-        self.assertTrue("Page: %s" % (self.browser.current_url,) in body)
+        self.assertTrue(f"Username: {self.get_my_username()}" in body)
+        self.assertTrue(f"Page: {self.browser.current_url}" in body)
 
 
     def test_feedback_dialog_displays_submission_status(self):
@@ -207,7 +207,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         self.wait_for_element_visibility('id=id_feedback_dialog', True)
 
         # * He enters some text into the message field
-        MESSAGE = 'Dear Sirs, your product is teh awesomez!!! love ' + self.get_my_username()
+        MESSAGE = f'Dear Sirs, your product is teh awesomez!!! love {self.get_my_username()}'
         self.selenium.type('id=id_feedback_dialog_text', MESSAGE)
 
         # * He types his email address
@@ -246,7 +246,7 @@ class Test_2884_FeedbackForm(FunctionalTest):
         )
 
         # He waits for a moment, and the server magically fixes itself.
-        self.selenium.get_eval("window.urls.feedback = '%s'" % (old_feedback_url,))
+        self.selenium.get_eval(f"window.urls.feedback = '{old_feedback_url}'")
 
         # He tries again.
         self.selenium.click('id=id_feedback_dialog_ok_button')

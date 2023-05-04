@@ -50,11 +50,7 @@ def build_dependency_graph(worksheet):
         except CycleError:
             pass # Deal with escapees
 
-    leaves = []
-    for loc, deps in graph.iteritems():
-        if not deps.children:
-            leaves.append(loc)
-
+    leaves = [loc for loc, deps in graph.iteritems() if not deps.children]
     return graph, leaves
 
 
@@ -87,7 +83,7 @@ def _generate_cell_subgraph(worksheet, graph, loc, completed, path):
                     continue
                 valid_dependencies.add(dep_loc)
             except CycleError as cycle_error:
-                if not loc in completed:
+                if loc not in completed:
                     report_cell_error(worksheet, loc, cycle_error)
                 if loc in cycle_error.path:
                     completed.add(loc)

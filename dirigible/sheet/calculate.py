@@ -47,8 +47,7 @@ class MyStdout(object):
 
 def load_constants(worksheet):
     for loc in worksheet.iterkeys():
-        formula = worksheet[loc].formula
-        if formula:
+        if formula := worksheet[loc].formula:
             if not formula.startswith('='):
                 worksheet[loc].value = eval_constant(formula)
                 worksheet[loc].error = None
@@ -57,7 +56,7 @@ def load_constants(worksheet):
 def set_cell_error_and_add_to_console(worksheet, location, exception):
     cell = worksheet[location]
     cell.value = undefined
-    cell.error = "%s: %s" % (exception.__class__.__name__, str(exception))
+    cell.error = f"{exception.__class__.__name__}: {str(exception)}"
     worksheet.add_console_text(
         "{error_text}\n    Formula '{formula}' in {cell_name}\n".format(
             error_text=cell.error,
@@ -144,14 +143,15 @@ def _calculate(worksheet, usercode, private_key):
         'worksheet': worksheet,
         'load_constants': load_constants,
         'undefined': undefined,
-
         'CellRange': CellRange,
         'DateTime': DateTime,
         'FormulaError': FormulaError,
         '_raise': _raise,
         'sys': sys,
+        'run_worksheet': lambda url, overrides=None: run_worksheet(
+            url, overrides, private_key
+        ),
     }
-    context['run_worksheet'] = lambda url, overrides=None: run_worksheet(url, overrides, private_key)
     context['evaluate_formulae'] = lambda worksheet: evaluate_formulae_in_context(worksheet, context)
     old_stdout = sys.stdout
     sys.stdout = MyStdout(worksheet)
@@ -164,7 +164,7 @@ def _calculate(worksheet, usercode, private_key):
             line_no = e.lineno
             worksheet.add_console_text("%s (line %s)\n" % (error, line_no))
         else:
-            error = "%s: %s" % (type(e).__name__, str(e))
+            error = f"{type(e).__name__}: {str(e)}"
             tb = sys.exc_info()[2]
             line_no = traceback.extract_tb(tb)[-1][1]
             worksheet.add_console_text("%s\n%s\n" % (error, format_traceback(traceback.extract_tb(tb))))
@@ -185,15 +185,9 @@ def format_traceback(frames):
         if filename == '<string>':
             filename = '    User code'
         else:
-            filename = '    File "%s"' % (filename,)
-        if function == '<module>':
-            function = ''
-        else:
-            function = ', in %s' % (function,)
-        if source is None:
-            source = ''
-        else:
-            source = '\n        %s' % (source,)
+            filename = f'    File "{filename}"'
+        function = '' if function == '<module>' else f', in {function}'
+        source = '' if source is None else '\n        %s' % (source,)
         return "%s line %d%s%s" % (filename, line_no, function, source)
 
     return '\n'.join(
@@ -209,17 +203,16 @@ def _raise(exc):
 
 
 def run_worksheet(worksheet_url, overrides, private_key):
-    target_url = '%sv%s/json/' % (worksheet_url, CURRENT_API_VERSION)
+    target_url = f'{worksheet_url}v{CURRENT_API_VERSION}/json/'
     opener = urllib2.build_opener()
-    parameters = {}
-    parameters['dirigible_l337_private_key'] = private_key
+    parameters = {'dirigible_l337_private_key': private_key}
     if overrides is not None:
-        str_overrides = dict((loc, str(value)) for loc, value in overrides.iteritems())
-        parameters.update(str_overrides)
+        str_overrides = {loc: str(value) for loc, value in overrides.iteritems()}
+        parameters |= str_overrides
     sheet_reader = opener.open(target_url, data=urlencode(parameters))
     sheet = api_json_to_worksheet(sheet_reader.read())
     if sheet._usercode_error:
-        raise Exception('run_worksheet: %s' % (sheet._usercode_error['message'],))
+        raise Exception(f"run_worksheet: {sheet._usercode_error['message']}")
     return sheet
 
 

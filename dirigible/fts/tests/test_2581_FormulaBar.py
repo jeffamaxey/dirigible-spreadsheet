@@ -54,8 +54,7 @@ class Test_2581_FormulaBar(FunctionalTest):
         self.wait_for_cell_to_become_active(1, 1)
         self.wait_for_formula_bar_enabled()
         self.click_formula_bar()
-        self.assertTrue(
-            self.is_element_focused('id=%s' % (self.get_formula_bar_id(),)))
+        self.assertTrue(self.is_element_focused(f'id={self.get_formula_bar_id()}'))
         self.wait_for_formula_bar_contents("")
 
         # * As he starts to type "456", he observes that the cell editor

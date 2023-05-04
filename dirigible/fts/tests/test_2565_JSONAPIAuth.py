@@ -104,7 +104,7 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
 
         self.wait_for(
             lambda: get_clipboard_text() == api_url,
-            lambda: 'bad clipboard text, was: %s' % (get_clipboard_text(),)
+            lambda: f'bad clipboard text, was: {get_clipboard_text()}',
         )
 
         # * nothing appears outside the JSON API dialog box yet though.
@@ -183,11 +183,7 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
             self.selenium.get_attribute('css=#id_security_button@alt')
         )
 
-        expected_url = "%s%s?api_key=%s" % (
-            self.selenium.browserURL[:-1],
-            urlparse(Url.api_url(self.get_my_username(), sheet_id)).path,
-            api_key
-        )
+        expected_url = f"{self.selenium.browserURL[:-1]}{urlparse(Url.api_url(self.get_my_username(), sheet_id)).path}?api_key={api_key}"
         self.assertEquals(api_url, expected_url)
 
         # .. despite this helpful link, he tries again with the wrong API key
@@ -344,7 +340,9 @@ class Test_2565_JSONAPIAuth(FunctionalTest):
         self.wait_for_element_visibility('id=id_security_form_save_error', True)
 
         # He waits for a moment, and the server magically fixes itself.
-        self.selenium.get_eval("window.urls.setSecuritySettings = '%s'" % (old_set_security_settings_url,))
+        self.selenium.get_eval(
+            f"window.urls.setSecuritySettings = '{old_set_security_settings_url}'"
+        )
 
         # He tries again, and the dialog disappears.
         self.selenium.click('id=id_security_form_ok_button')

@@ -76,7 +76,7 @@ class Test_2521_CodeEditor(FunctionalTest):
         self.human_key_press('abcabc')
         self.wait_for(
             lambda: 'abcabc' in self.get_usercode(),
-            lambda: 'could not find abcabc in {}'.format(self.get_usercode()),
+            lambda: f'could not find abcabc in {self.get_usercode()}',
         )
 
 
@@ -171,13 +171,8 @@ class Test_2521_CodeEditor(FunctionalTest):
         # * Harold logs in and creates a new sheet
         self.login_and_create_new_sheet()
 
-        # He enters some long and complicated usercode, which contains the string "123" at a well-known place,
-        # and doesn't hit "save".
-        code = ""
-        for i in range(100):
-            code += "a\n"
-        code += "abc123def"
-        for i in range(100):
+        code = "".join("a\n" for _ in range(100)) + "abc123def"
+        for _ in range(100):
             code += "a\n"
 
         self.enter_usercode(code, commit_change=False)
@@ -203,11 +198,7 @@ class Test_2521_CodeEditor(FunctionalTest):
         # * Harold logs in and creates a new sheet
         self.login_and_create_new_sheet()
 
-        # He enters some long and complicated usercode and doesn't hit "save".
-        code = ""
-        for i in range(200):
-            code += "a\n"
-
+        code = "".join("a\n" for _ in range(200))
         self.enter_usercode(code, commit_change=False)
 
         # He hits ^L, and types 100 into the resulting dialog.

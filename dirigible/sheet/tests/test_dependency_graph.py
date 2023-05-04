@@ -34,66 +34,29 @@ class TestBuildDependencyGraph(ResolverTestCase):
         self.assertEquals(
             graph,
             {
-                (1, 1): Node(
-                    (1, 1),
-                    children=set([(1, 2), (2, 2)]),
-                    parents=set()
-                ),
-                (1, 2): Node(
-                    (1, 2),
-                    children=set([(1, 3)]),
-                    parents=set([(1, 1)])
-                ),
-                (2, 2): Node(
-                    (2, 2),
-                    children=set(),
-                    parents=set([(1, 1)])
-                ),
-                (1, 3): Node(
-                    (1, 3),
-                    children=set(),
-                    parents=set([(1, 2)])
-                ),
-                (3, 3): Node(
-                    (3, 3),
-                    children=set(),
-                    parents=set()
-                ),
-            }
+                (1, 1): Node((1, 1), children={(1, 2), (2, 2)}, parents=set()),
+                (1, 2): Node((1, 2), children={(1, 3)}, parents={(1, 1)}),
+                (2, 2): Node((2, 2), children=set(), parents={(1, 1)}),
+                (1, 3): Node((1, 3), children=set(), parents={(1, 2)}),
+                (3, 3): Node((3, 3), children=set(), parents=set()),
+            },
         )
-        self.assertEquals(set(leaves), set([(1, 3), (2, 2), (3, 3)]))
+        self.assertEquals(set(leaves), {(1, 3), (2, 2), (3, 3)})
 
         worksheet[1, 2].formula = '=A3 + B3'
         graph, leaves = build_dependency_graph(worksheet)
 
-        self.assertEquals(graph, {
-            (1, 1): Node(
-                (1, 1),
-                children=set([(1, 2), (2, 2)]),
-                parents=set(),
-            ),
-            (1, 2): Node(
-                (1, 2),
-                children=set([(1, 3)]),
-                parents=set([(1, 1)]),
-            ),
-            (2, 2): Node(
-                (2, 2),
-                children=set(),
-                parents=set([(1, 1)])
-            ),
-            (1, 3): Node(
-                (1, 3),
-                children=set(),
-                parents=set([(1, 2)])
-            ),
-            (3, 3): Node(
-                (3, 3),
-                children=set(),
-                parents=set()
-            ),
-        })
-        self.assertEquals(set(leaves), set([(1, 3), (2, 2), (3, 3)]))
+        self.assertEquals(
+            graph,
+            {
+                (1, 1): Node((1, 1), children={(1, 2), (2, 2)}, parents=set()),
+                (1, 2): Node((1, 2), children={(1, 3)}, parents={(1, 1)}),
+                (2, 2): Node((2, 2), children=set(), parents={(1, 1)}),
+                (1, 3): Node((1, 3), children=set(), parents={(1, 2)}),
+                (3, 3): Node((3, 3), children=set(), parents=set()),
+            },
+        )
+        self.assertEquals(set(leaves), {(1, 3), (2, 2), (3, 3)})
 
 
     def test_is_robust_against_references_to_empty_cells(self):
@@ -134,9 +97,9 @@ class TestBuildDependencyGraph(ResolverTestCase):
             graph,
             {
                 (1, 3): Node((1, 3), children=set(), parents=set()),
-                (1, 4): Node((1, 4), children=set([(1, 5)]), parents=set()),
-                (1, 5): Node((1, 5), children=set(), parents=set([(1, 4)])),
-            }
+                (1, 4): Node((1, 4), children={(1, 5)}, parents=set()),
+                (1, 5): Node((1, 5), children=set(), parents={(1, 4)}),
+            },
         )
         self.assertEquals(leaves, [(1, 5), (1, 3)])
         a1_cycle_error = CycleError([(1, 2), (1, 1), (1, 2)])
@@ -202,7 +165,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
 
         self.assertEqual(
             mock_add_location_dependencies.call_args,
-            ((graph, (1, 11), set([(99, 98)])), {}),
+            ((graph, (1, 11), {(99, 98)}), {}),
         )
 
 
@@ -261,7 +224,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         worksheet = Worksheet()
         worksheet[1, 2] = cell
 
-        _generate_cell_subgraph(worksheet, sentinel.graph, (1, 2), set([(1, 2)]), [])
+        _generate_cell_subgraph(worksheet, sentinel.graph, (1, 2), {(1, 2)}, [])
 
         self.assertFalse(mock_add_location_dependencies.called)
 
@@ -283,7 +246,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         _generate_cell_subgraph(worksheet, sentinel.graph, (1, 2), visited, [])
 
         self.assertEquals(visited_set_at_time_of_recursive_call[0], set())
-        self.assertEquals(visited, set([(1, 2)]))
+        self.assertEquals(visited, {(1, 2)})
         self.assertTrue(mock_generate_cell_subgraph.called)
 
 
@@ -373,13 +336,13 @@ class TestGenerateCellSubgraph(ResolverTestCase):
         worksheet[1, 3].formula = "=foo"
         worksheet[1, 3].dependencies = [(3, 4)]
 
-        visited = set([(1, 2), (3, 4)])
+        visited = {(1, 2), (3, 4)}
         graph = {}
         _generate_cell_subgraph(worksheet, graph, (1, 3), visited, [])
 
         dep_cell_calls = [c[0][2] for c in mock_recursive_call.call_args_list]
         self.assertNotIn(dep_cell_calls, (3, 4))
-        self.assertEquals(visited, set([(1, 2), (1, 3), (3, 4)]))
+        self.assertEquals(visited, {(1, 2), (1, 3), (3, 4)})
         self.assertEquals(graph, {(1, 3): Node((1, 3), set())})
 
 
@@ -394,7 +357,7 @@ class TestGenerateCellSubgraph(ResolverTestCase):
 
         _generate_cell_subgraph(worksheet, graph, (1, 3), visited, [])
         self.assertEquals(graph, {(1, 3): Node((1, 3), set())})
-        self.assertEquals(visited, set([(1, 2), (1, 3), (1, 1)]))
+        self.assertEquals(visited, {(1, 2), (1, 3), (1, 1)})
 
 
     @patch('sheet.dependency_graph.report_cell_error')
@@ -422,15 +385,15 @@ class TestDependencyGraphNode(ResolverTestCase):
         self.assertEquals(n1.children, set())
         self.assertEquals(n1.parents, set())
 
-        n2 = Node((2, 3), children=set([1, 2, 3]))
+        n2 = Node((2, 3), children={1, 2, 3})
         self.assertEquals(n2.location, (2, 3))
-        self.assertEquals(n2.children, set([1, 2, 3]))
+        self.assertEquals(n2.children, {1, 2, 3})
         self.assertEquals(n2.parents, set())
 
-        n3 = Node((4, 5), parents=set([1, 2, 3]))
+        n3 = Node((4, 5), parents={1, 2, 3})
         self.assertEquals(n3.location, (4, 5))
         self.assertEquals(n3.children, set())
-        self.assertEquals(n3.parents, set([1, 2, 3]))
+        self.assertEquals(n3.parents, {1, 2, 3})
 
     def test_nodes_should_have_a_lock(self):
         node = Node((1, 2))
@@ -438,10 +401,10 @@ class TestDependencyGraphNode(ResolverTestCase):
         self.assertIsNotNone(node.lock.release)
 
     def test_equality(self):
-        n1 = Node((1, 2), children=set([1]))
-        n1.parents = set([2])
-        n2 = Node((1, 2), children=set([1]))
-        n2.parents = set([2])
+        n1 = Node((1, 2), children={1})
+        n1.parents = {2}
+        n2 = Node((1, 2), children={1})
+        n2.parents = {2}
 
         self.assertTrue(n1 == n2)
         self.assertFalse(n1 != n2)
@@ -451,30 +414,30 @@ class TestDependencyGraphNode(ResolverTestCase):
         self.assertTrue(n1 != n2)
 
         n2.location = (1, 2)
-        n2.parents = set([3])
+        n2.parents = {3}
         self.assertFalse(n1 == n2)
         self.assertTrue(n1 != n2)
 
-        n2.children = set([3])
+        n2.children = {3}
         self.assertFalse(n1 == n2)
         self.assertTrue(n1 != n2)
 
-        n2.parents = set([2])
+        n2.parents = {2}
         self.assertFalse(n1 == n2)
         self.assertTrue(n1 != n2)
 
     def test_repr(self):
         self.assertEquals(
-            str(Node((1, 2), children=set([1, 2, 3]))),
-            "<Node 1,2 children={1, 2, 3} parents={}>"
+            str(Node((1, 2), children={1, 2, 3})),
+            "<Node 1,2 children={1, 2, 3} parents={}>",
         )
 
     def test_remove_should_acquire_lock_on_parent_nodes(self):
         parent1 = Node((1, 2))
         parent2 = Node((2, 3))
-        node = Node((3, 4), parents=set([(1, 2), (2, 3)]))
-        parent1.children = set([(3, 4)])
-        parent2.children = set([(3, 4)])
+        node = Node((3, 4), parents={(1, 2), (2, 3)})
+        parent1.children = {(3, 4)}
+        parent2.children = {(3, 4)}
         leaf_queue = Mock()
 
         parent1.lock = Mock()
@@ -500,9 +463,9 @@ class TestDependencyGraphNode(ResolverTestCase):
 
     def test_remove_should_add_new_leaves_to_queue(self):
         parent = Node((1, 2))
-        child1 = Node((2, 3), parents=set([parent.location]))
-        child2 = Node((3, 4), parents=set([parent.location]))
-        parent.children = set([child1.location, child2.location])
+        child1 = Node((2, 3), parents={parent.location})
+        child2 = Node((3, 4), parents={parent.location})
+        parent.children = {child1.location, child2.location}
         leaf_queue = Mock()
 
         child1.remove_from_parents([parent], leaf_queue)
@@ -518,7 +481,7 @@ class TestAddLocationDependencies(ResolverTestCase):
 
     def test_add_location_dependencies_does(self):
         graph = {}
-        dependencies = set([sentinel.dependencies])
+        dependencies = {sentinel.dependencies}
         _add_location_dependencies(graph, sentinel.location, dependencies)
         self.assertEquals(type(graph[sentinel.location]), Node)
         self.assertEquals(graph[sentinel.location].children, dependencies)
@@ -530,33 +493,31 @@ class TestAddLocationDependencies(ResolverTestCase):
         child2_loc = (3, 4)
         grandchild_loc = (4, 5)
 
-        _add_location_dependencies(graph, parent_loc, set([child1_loc, child2_loc]))
+        _add_location_dependencies(graph, parent_loc, {child1_loc, child2_loc})
         expected = {
-            parent_loc: Node(parent_loc, children=set([child1_loc, child2_loc])),
-            child1_loc: Node(child1_loc, parents=set([parent_loc])),
-            child2_loc: Node(child2_loc, parents=set([parent_loc])),
+            parent_loc: Node(parent_loc, children={child1_loc, child2_loc}),
+            child1_loc: Node(child1_loc, parents={parent_loc}),
+            child2_loc: Node(child2_loc, parents={parent_loc}),
         }
         self.assertEquals(expected, graph)
 
         _add_location_dependencies(graph, grandchild_loc, set())
         expected = {
-            parent_loc: Node(parent_loc, children=set([child1_loc, child2_loc])),
-            child1_loc: Node(child1_loc, parents=set([parent_loc])),
-            child2_loc: Node(child2_loc, parents=set([parent_loc])),
+            parent_loc: Node(parent_loc, children={child1_loc, child2_loc}),
+            child1_loc: Node(child1_loc, parents={parent_loc}),
+            child2_loc: Node(child2_loc, parents={parent_loc}),
             grandchild_loc: Node(grandchild_loc),
         }
         self.assertEquals(expected, graph)
 
-        _add_location_dependencies(graph, child1_loc, set([grandchild_loc]))
+        _add_location_dependencies(graph, child1_loc, {grandchild_loc})
         expected = {
-            parent_loc: Node(parent_loc, children=set([child1_loc, child2_loc])),
+            parent_loc: Node(parent_loc, children={child1_loc, child2_loc}),
             child1_loc: Node(
-                child1_loc,
-                children=set([grandchild_loc]),
-                parents=set([parent_loc])
+                child1_loc, children={grandchild_loc}, parents={parent_loc}
             ),
-            child2_loc: Node(child2_loc, parents=set([parent_loc])),
-            grandchild_loc: Node(grandchild_loc, parents=set([child1_loc])),
+            child2_loc: Node(child2_loc, parents={parent_loc}),
+            grandchild_loc: Node(grandchild_loc, parents={child1_loc}),
         }
         self.assertEquals(expected, graph)
 

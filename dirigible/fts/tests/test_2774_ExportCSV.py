@@ -67,10 +67,10 @@ class Test_2774_ExportCSV(FunctionalTest):
 
         stream = self.get_url_with_session_cookie(download_url)
         self.assertEquals(stream.info().gettype(), "text/csv")
-        sheet_name = 'Sheet %s' % (sheet_id,)
+        sheet_name = f'Sheet {sheet_id}'
         self.assertEquals(
-                stream.info()['Content-Disposition'],
-                'attachment; filename=%s.csv' % (sheet_name,)
+            stream.info()['Content-Disposition'],
+            f'attachment; filename={sheet_name}.csv',
         )
 
         expected_file_name = path.join(
@@ -147,13 +147,13 @@ class Test_2774_ExportCSV(FunctionalTest):
 
         opener = urllib2.build_opener()
         session_cookie = self.selenium.get_cookie_by_name('sessionid')
-        opener.addheaders.append(('Cookie', 'sessionid=%s' % (session_cookie, )))
+        opener.addheaders.append(('Cookie', f'sessionid={session_cookie}'))
         stream = opener.open(download_url)
         self.assertEquals(stream.info().gettype(), "text/csv")
-        sheet_name = 'Sheet %s' % (sheet_id,)
+        sheet_name = f'Sheet {sheet_id}'
         self.assertEquals(
-                stream.info()['Content-Disposition'],
-                'attachment; filename=%s.csv' % (sheet_name,)
+            stream.info()['Content-Disposition'],
+            f'attachment; filename={sheet_name}.csv',
         )
 
         expected_file_name = path.join(

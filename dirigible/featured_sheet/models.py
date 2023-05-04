@@ -12,4 +12,4 @@ class FeaturedSheet(models.Model):
     more_info_url = models.CharField(max_length=1024, default='', blank=True)
 
     def __unicode__(self):
-        return 'Feature: %s' % (self.sheet.name,)
+        return f'Feature: {self.sheet.name}'

@@ -30,4 +30,4 @@ class TestRedirectTo(unittest.TestCase):
         response = redirect_to(request, url)
         self.assertTrue(isinstance(response, HttpResponsePermanentRedirect))
         self.assertEquals(response.status_code, 301)
-        self.assertEquals(response['Location'], url + '?feed=rss2')
+        self.assertEquals(response['Location'], f'{url}?feed=rss2')

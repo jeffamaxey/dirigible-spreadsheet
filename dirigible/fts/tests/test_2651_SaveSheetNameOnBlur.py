@@ -29,7 +29,7 @@ class Test_2651_SaveSheetNameOnBlur(FunctionalTest):
         # * and notes that his sheet now has the new name
         self.wait_for(
             lambda: self.get_text('id=id_sheet_name') == 'clicky namey',
-            lambda: 'sheet name to be updated was "%s"' % (self.get_text('id=id_sheet_name'),)
+            lambda: f"""sheet name to be updated was "{self.get_text('id=id_sheet_name')}\"""",
         )
 
         # * and the sheet name is not in edit mode
